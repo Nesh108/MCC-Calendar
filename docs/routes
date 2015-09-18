@@ -1,0 +1,19 @@
+== API Routes ==
+
+/
+  GET: Welcome message
+
+---------------------------------
+
+/api/events
+  GET: Get all existing events
+  POST: Create a new event
+
+---------------------------------
+
+/api/events/:event_id
+  GET: Get specific event
+  PUT: Update specific event
+  DELETE: Delete specific event
+
+---------------------------------

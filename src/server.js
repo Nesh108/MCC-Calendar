@@ -89,7 +89,7 @@ router.route('/events')
 
 router.route('/events/:event_id')
 
-    // Read specific event
+    // Read specific event (GET)
     .get(function(req, res) {
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
@@ -99,7 +99,7 @@ router.route('/events/:event_id')
       });
     })
 
-    // Update specific event
+    // Update specific event (PUT)
     .put(function(req, res) {
 
       Event.findById(req.params.event_id, function(err, evt) {
@@ -127,7 +127,7 @@ router.route('/events/:event_id')
       });
     })
 
-    // Delete specific event
+    // Delete specific event (DELETE)
     .delete(function(req, res) {
       Event.remove({
         _id: req.params.event_id
