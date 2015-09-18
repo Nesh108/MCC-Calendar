@@ -4,7 +4,7 @@ Calendar for the Mobile Cloud Computing course at Aalto University (Espoo, Finla
 
 **Link to course**: https://mycourses.aalto.fi/course/view.php?id=8779
 
-= How to Run =
+== How to Run ==
 
 - Clone
 - Execute 'npm install' in the main folder
