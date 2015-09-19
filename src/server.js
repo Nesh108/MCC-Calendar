@@ -143,27 +143,15 @@ router.route('/events/:event_id')
 
 // Inspired by: https://stackoverflow.com/a/18933902/1214469
 
-router.route('/events/searches/status')
+
+router.route('/events/searches')
 
   .post(function(req, res){
-    Event.find({
-      status : req.body.status
-    }).exec(function(err, evts){
 
-    if(err)
-      res.send(err);
+    Event.find(req.body).exec(function(err, evts){
 
-    res.json(evts);
-
-    });
-  });
-
-router.route('/events/searches/visible')
-
-  .post(function(req, res){
-    Event.find({
-      visible : req.body.visible
-    }).exec(function(err, evts){
+    // DEBUG
+    console.log(req.body);
 
     if(err)
       res.send(err);
