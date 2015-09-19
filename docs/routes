@@ -22,3 +22,8 @@
   POST: Search events given terms
 
 ---------------------------------
+
+/api/events/synchronize
+  POST: Get iCal export
+
+---------------------------------
