@@ -57,7 +57,8 @@ router.route('/events')
     evt.name = req.body.name;
     evt.description = req.body.description;
     evt.location = req.body.location;
-    evt.timestampStart = req.body.timestampStart;
+    evt.dateStart = req.body.dateStart;
+    evt.dateEnd = req.body.dateEnd;
     evt.recurCount = req.body.recurCount;
     evt.periodFreq = req.body.periodFreq;
     evt.periodId = req.body.periodId;
@@ -108,7 +109,8 @@ router.route('/events/:event_id')
         evt.name = req.body.name;
         evt.description = req.body.description;
         evt.location = req.body.location;
-        evt.timestampStart = req.body.dateStart;
+        evt.dateStart = req.body.dateStart;
+        evt.dateEnd = req.body.dateEnd;
         evt.recurCount = req.body.recurCount;
         evt.periodFreq = req.body.periodFreq;
         evt.periodId = req.body.periodId;
@@ -133,7 +135,7 @@ router.route('/events/:event_id')
         if(err)
           res.send(err);
 
-        res.json({ message:  'Event ' + req.params.event_id + ' successfully deleted!'})
+        res.json({ message:  'Event ' + req.params.event_id + ' successfully deleted!'});
       });
     });
 
@@ -159,6 +161,39 @@ router.route('/events/searches')
     res.json(evts);
 
     });
+  });
+
+//////////////////////
+// Calendar sync route
+//////////////////////
+
+// https://en.wikipedia.org/wiki/ICalendar
+
+router.route('/events/synchronize')
+
+  .post(function(req, res){
+
+    var ics_file = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nPRODID:-//nesh//NONSGML v1.0//EN\nVERSION:2.0\n";
+
+    // First simple version
+    Event.find().stream()
+      .on('data', function(evt){
+        ics_file += "BEGIN:VEVENT\n" +
+            "UID:" + evt._id + "\n" +
+            "DTSTAMP:" + new Date().toISOString() + "\n" +
+            "DTSTART:" + evt.dateStart.toISOString() + "\n" +
+            "SUMMARY:" + evt.name + "\n" +
+            "DESCRIPTION:" + evt.description + "\n" +
+            "CLASS:PUBLIC\n" +
+            "END:VEVENT\n";
+      })
+      .on('error', function(err){
+        res.send(err);
+      })
+      .on('end', function(){
+        ics_file += "END:VCALENDAR";
+        res.send(ics_file);
+      });
   });
 
 
