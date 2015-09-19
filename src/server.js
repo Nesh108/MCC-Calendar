@@ -57,8 +57,7 @@ router.route('/events')
     evt.name = req.body.name;
     evt.description = req.body.description;
     evt.location = req.body.location;
-    evt.time = req.body.time;
-    evt.dateStart = req.body.dateStart;
+    evt.timestampStart = req.body.timestampStart;
     evt.recurCount = req.body.recurCount;
     evt.periodFreq = req.body.periodFreq;
     evt.periodId = req.body.periodId;
@@ -109,8 +108,7 @@ router.route('/events/:event_id')
         evt.name = req.body.name;
         evt.description = req.body.description;
         evt.location = req.body.location;
-        evt.time = req.body.time;
-        evt.dateStart = req.body.dateStart;
+        evt.timestampStart = req.body.dateStart;
         evt.recurCount = req.body.recurCount;
         evt.periodFreq = req.body.periodFreq;
         evt.periodId = req.body.periodId;
@@ -138,6 +136,44 @@ router.route('/events/:event_id')
         res.json({ message:  'Event ' + req.params.event_id + ' successfully deleted!'})
       });
     });
+
+//////////////////////
+// Search route
+//////////////////////
+
+// Inspired by: https://stackoverflow.com/a/18933902/1214469
+
+router.route('/events/searches/status')
+
+  .post(function(req, res){
+    Event.find({
+      status : req.body.status
+    }).exec(function(err, evts){
+
+    if(err)
+      res.send(err);
+
+    res.json(evts);
+
+    });
+  });
+
+router.route('/events/searches/visible')
+
+  .post(function(req, res){
+    Event.find({
+      visible : req.body.visible
+    }).exec(function(err, evts){
+
+    if(err)
+      res.send(err);
+
+    res.json(evts);
+
+    });
+  });
+
+
 
 app.use('/api', router);
 

@@ -17,3 +17,8 @@
   DELETE: Delete specific event
 
 ---------------------------------
+
+/api/events/searches
+  POST: Search events given terms
+
+---------------------------------
