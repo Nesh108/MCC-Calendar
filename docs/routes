@@ -23,7 +23,7 @@
 
 ---------------------------------
 
-/api/events/synchronize
-  POST: Get iCal export
+/api/events/synchronize/all
+  GET: Get iCal export
 
 ---------------------------------

@@ -169,14 +169,14 @@ router.route('/events/searches')
 
 // https://en.wikipedia.org/wiki/ICalendar
 
-router.route('/events/synchronize')
+router.route('/events/synchronize/all')
 
-  .post(function(req, res){
+  .get(function(req, res){
 
     var ics_file = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nPRODID:-//nesh//NONSGML v1.0//EN\nVERSION:2.0\n";
 
     // First simple version
-    Event.find().stream()
+    Event.find({}).stream()
       .on('data', function(evt){
         ics_file += "BEGIN:VEVENT\n" +
             "UID:" + evt._id + "\n" +
