@@ -1,10 +1,19 @@
 //////////////////////
-// Server setup
+// Web Server setup
 //////////////////////
 
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var fs = require('fs');
+var http = require('http');
+var path = require('path');
+var url = require('url');
+
+var port_api = process.env.PORT || 9090;  // Port for API requests
+var port_web = process.env.PORT || 8080;  // Post for web requests
+
+var WEB_DIR = 'views';  // Folder for web pages
 
 //////////////////////
 // Configure MongoDB
@@ -22,9 +31,13 @@ var Event = require('./app/models/event');
 app.use(bodyParser.urlencoded({ extended : true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080;
+var router = express.Router();  // Router for RESTful api
 
-var router = express.Router();
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+/// RESTful API
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 //////////////////////
 // Requests logging
@@ -196,11 +209,81 @@ router.route('/events/synchronize/all')
       });
   });
 
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+/// Web Server
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
+// Inspired by: https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server
+
+http.createServer(function(request, response) {
+
+  var uri = url.parse(request.url).pathname;
+
+  console.log('Requested: ' + uri);
+
+  // Allowing requests without HTML extensions
+  if(uri.indexOf('.') == -1 && uri.indexOf('/', uri.length - 1) == -1)
+    uri += '.html';
+
+  var filename = path.join(process.cwd(), WEB_DIR + uri);
+  var contentTypesByExtension = {
+    '.html': "text/html",
+    '.css': "text/css",
+    '.js': "text/javascript"
+  };
+
+  fs.exists(filename, function(exists) {
+    if(!exists) {
+
+      // Load default 404 page
+      fs.readFile('views/not_found.html', "binary", function(err, file) {
+        // Error while loading the error page: great job devs!
+        if(err){
+          response.writeHead(500, {"Content-Type": "text/plain"});
+          response.write(err + "\n");
+          response.end();
+          return;
+        }
+
+        response.writeHead(404, {"Content-Type": "text/html"});
+        response.write(file, "binary");
+        response.end();
+      });
+
+      return;
+    }
+
+    if(fs.statSync(filename).isDirectory())
+      filename += 'index.html';
+
+
+    fs.readFile(filename, "binary", function(err, file) {
+      if(err){
+        response.writeHead(500, {"Content-Type": "text/plain"});
+        response.write(err + "\n");
+        response.end();
+        return;
+      }
+
+      var headers = {};
+      var contentType = contentTypesByExtension[path.extname(filename)];
+      if(contentType)
+        headers["Content-Type"] = contentType;
+      response.writeHead(200, headers);
+      response.write(file, "binary");
+      response.end();
+    });
+  });
+}).listen(parseInt(port_web, 10));
+
 
 
 app.use('/api', router);
 
 // Start server
 
-app.listen(port);
-console.log('Doing the stuff you know on port ' + port);
+app.listen(port_api);
+console.log('API: Listening on port ' + port_api);
+console.log('Web: Listening on port ' + port_web);
