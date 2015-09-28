@@ -2,8 +2,8 @@ var config = {};
 
 config.db = {};
 
-config.db.user_name = "mcc-calendar_root";
-config.db.password = "mcc-calendar_root_password";
-config.db.URI = "ds040898.mongolab.com:40898/mcc-calendardb";
+config.db.user_name = MONGODB_USER;
+config.db.password = MONGODB_PASS;
+config.db.URI = MONGODB_URI;
 
 module.exports = config;
