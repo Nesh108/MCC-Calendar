@@ -2,8 +2,8 @@ var config = {};
 
 config.db = {};
 
-config.db.user_name = 'pier';
-config.db.password = 'pettolona';
-config.db.URI = 'ds051883.mongolab.com:51883/mccmongodb_2';
+config.db.user_name = MONGODB_USER;
+config.db.password = MONGODB_PASS;
+config.db.URI = MONGODB_URI;
 
 module.exports = config;
