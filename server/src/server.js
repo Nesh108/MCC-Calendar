@@ -23,6 +23,15 @@ var config = require('./deploy/config');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://' + config.db.user_name + ':' + config.db.password + '@' + config.db.URI);
 var Event = require('./app/models/event');
+var User = require('./app/models/user');
+
+//////////////////////
+// Configure passport
+//////////////////////
+
+var passport = require('passport');
+var authController = require('./controllers/auth');
+app.use(passport.initialize());
 
 //////////////////////
 // Configure body parser
@@ -40,14 +49,44 @@ var router = express.Router();  // Router for RESTful api
 ////////////////////////////////////////////////////////////////
 
 //////////////////////
-// Requests logging
+// Middleware
 //////////////////////
 
 router.use(function(req, res, next) {
-  // TODO: Check if user is authorized
-    console.log('API request!');
-    next();
+  console.log('API request!');
+  next();
 });
+
+//////////////////////
+// User route
+//////////////////////
+
+router.route('/users')
+
+  // Create a new user (POST)
+  .post(function(req, res) {
+    var user = new User({
+      username: req.body.username,
+      password: req.body.password
+    });
+
+    user.save(function(err) {
+      if (err)
+        res.send(err);
+
+      res.json({ message: 'User created successfully!' });
+    });
+  })
+
+  // Get all users (GET) TODO: remove this in in final product
+  .get(authController.authorized, function(req, res) {
+    User.find(function(err, users) {
+      if (err)
+        res.send(err);
+
+      res.json(users);
+    });
+  });
 
 ///////////////////////////////
 // Root route: Welcome message
@@ -64,7 +103,7 @@ router.get('/', function(req, res) {
 router.route('/events')
 
   // Create a new event (POST)
-  .post(function(req, res) {
+  .post(authController.authorized, function(req, res) {
 
     var evt = new Event();
     evt.name = req.body.name;
@@ -87,7 +126,7 @@ router.route('/events')
   })
 
   // Get all events (GET)
-  .get(function(req, res) {
+  .get(authController.authorized, function(req, res) {
     Event.find(function(err, events) {
       if(err)
         res.send(err);
@@ -103,7 +142,7 @@ router.route('/events')
 router.route('/events/:event_id')
 
     // Read specific event (GET)
-    .get(function(req, res) {
+    .get(authController.authorized, function(req, res) {
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
           res.send(err);
@@ -113,7 +152,7 @@ router.route('/events/:event_id')
     })
 
     // Update specific event (PUT)
-    .put(function(req, res) {
+    .put(authController.authorized, function(req, res) {
 
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
@@ -141,7 +180,7 @@ router.route('/events/:event_id')
     })
 
     // Delete specific event (DELETE)
-    .delete(function(req, res) {
+    .delete(authController.authorized, function(req, res) {
       Event.remove({
         _id: req.params.event_id
       }, function(err, evt) {
@@ -161,7 +200,7 @@ router.route('/events/:event_id')
 
 router.route('/events/searches')
 
-  .post(function(req, res){
+  .post(authController.authorized, function(req, res){
 
     Event.find(req.body).exec(function(err, evts){
 
