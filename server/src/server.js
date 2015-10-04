@@ -116,6 +116,7 @@ router.route('/events')
     evt.periodId = req.body.periodId;
     evt.status = req.body.status;
     evt.visibile = req.body.visibile;
+    evt.owner = req.user.username;
 
     evt.save(function(err) {
       if(err)
@@ -125,9 +126,9 @@ router.route('/events')
     });
   })
 
-  // Get all events (GET)
+  // Get all events of a specific user (GET)
   .get(authController.authorized, function(req, res) {
-    Event.find(function(err, events) {
+    Event.find({owner:req.user.username}, function(err, events) {
       if(err)
         res.send(err);
 
@@ -146,6 +147,7 @@ router.route('/events/:event_id')
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
           res.send(err);
+
 
         res.json(evt);
       });
@@ -202,6 +204,8 @@ router.route('/events/searches')
 
   .post(authController.authorized, function(req, res){
 
+    req.body["owner"] = req.user.username;
+
     Event.find(req.body).exec(function(err, evts){
 
     // DEBUG
@@ -228,7 +232,7 @@ router.route('/events/synchronize/all')
     var ics_file = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nPRODID:-//nesh//NONSGML v1.0//EN\nVERSION:2.0\n";
 
     // First simple version
-    Event.find({}).stream()
+    Event.find({owner:req.user.username}).stream()
       .on('data', function(evt){
         ics_file += "BEGIN:VEVENT\n" +
             "UID:" + evt._id + "\n" +
