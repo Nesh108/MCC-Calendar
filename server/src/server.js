@@ -111,11 +111,18 @@ router.route('/events')
     evt.location = req.body.location;
     evt.dateStart = req.body.dateStart;
     evt.dateEnd = req.body.dateEnd;
+
     evt.recurCount = req.body.recurCount;
-    evt.periodFreq = req.body.periodFreq;
-    evt.periodId = req.body.periodId;
+    evt.recurFreq = req.body.recurFreq;
+    evt.recurInterval = req.body.recurInterval;
+    evt.recurUntil = req.body.recurUntil;
+    evt.recurByDay = req.body.recurByDay;
+    evt.recurByMonthDay = req.body.recurByMonthDay;
+    evt.recurByMonth = req.body.recurByMonth;
+    evt.recurWeekStart = req.body.recurWeekStart;
+
     evt.status = req.body.status;
-    evt.visibile = req.body.visibile;
+    evt.scope = req.body.scope;
     evt.owner = req.user.username;
 
     evt.save(function(err) {
@@ -227,7 +234,7 @@ router.route('/events/searches')
 
 router.route('/events/synchronize/all')
 
-  .get(function(req, res){
+  .get(authController.authorized, function(req, res){
 
     var ics_file = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nPRODID:-//nesh//NONSGML v1.0//EN\nVERSION:2.0\n";
 
@@ -236,12 +243,29 @@ router.route('/events/synchronize/all')
       .on('data', function(evt){
         ics_file += "BEGIN:VEVENT\n" +
             "UID:" + evt._id + "\n" +
-            "DTSTAMP:" + new Date().toISOString() + "\n" +
-            "DTSTART:" + evt.dateStart.toISOString() + "\n" +
+            "DTSTAMP:" + new Date().toISOString().replace(/[^\w\s]/gi, '') + "\n" +
+            "DTSTART:" + evt.dateStart.toISOString().replace(/[^\w\s]/gi, '') + "\n" +
             "SUMMARY:" + evt.name + "\n" +
-            "DESCRIPTION:" + evt.description + "\n" +
-            "CLASS:PUBLIC\n" +
-            "END:VEVENT\n";
+            "DESCRIPTION:" + evt.description + "\n";
+
+        if(evt.location) ics_file += "LOCATION:" + evt.location + "\n";
+        if(evt.dateEnd) ics_file += "DTEND:" + evt.dateEnd.toISOString().replace(/[^\w\s]/gi, '') + "\n";
+        if(evt.status) ics_file += "STATUS:" + evt.status + "\n";
+
+        var ics_file_recur = "";
+        if(evt.recurFreq) ics_file_recur += "FREQ=" + evt.recurFreq + ";";
+        if(evt.recurInterval) ics_file_recur += "INTERVAL=" + evt.recurInterval + ";";
+        if(evt.recurCount) ics_file_recur += "COUNT=" + evt.recurCount + ";";
+        if(evt.recurUntil) ics_file_recur += "UNTIL=" + evt.recurUntil.toISOString().replace(/[^\w\s]/gi, '') + ";";
+        if(evt.recurByDay) ics_file_recur += "BYDAY=" + evt.recurByDay + ";";
+        if(evt.recurByMonthDay) ics_file_recur += "BYMONTHDAY=" + evt.recurByMonthDay + ";";
+        if(evt.recurByMonth) ics_file_recur += "BYMONTH=" + evt.recurByMonth + ";";
+        if(evt.recurWeekStart) ics_file_recur += "WKST=" + evt.recurWeekStart + ";";
+
+        if(ics_file_recur) ics_file += "RRULE:" + ics_file_recur.substring(0, ics_file_recur.length - 1) + "\n";
+
+        if(evt.scope) ics_file += "CLASS:" + evt.scope + "\n";
+        ics_file += "END:VEVENT\n";
       })
       .on('error', function(err){
         res.send(err);

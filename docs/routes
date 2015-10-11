@@ -9,6 +9,20 @@
   GET: Get all existing events
   POST: Create a new event
 
+  (dates must be ISO 8601 format)
+
+  EXAMPLE:
+    name: eventtest1
+    description: testdescription
+    dateStart: 2015-11-01
+    location: Helsinki
+    dateEnd: 2015-11-01T04:00:00.000Z
+    recurFreq: WEEKLY
+    recurInterval: 2
+    recurUntil: 2016-11-01
+    recurWeekStart: SU
+
+
 ---------------------------------
 
 /api/events/:event_id
