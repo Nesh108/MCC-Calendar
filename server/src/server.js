@@ -13,7 +13,7 @@ var url = require('url');
 var port_api = process.env.PORT || 9090;  // Port for API requests
 var port_web = process.env.PORT || 8080;  // Post for web requests
 
-var WEB_DIR = 'views';  // Folder for web pages
+var WEB_DIR = __dirname + '/views';  // Folder for web pages
 
 //////////////////////
 // Configure MongoDB
@@ -305,7 +305,7 @@ http.createServer(function(request, response) {
     if(!exists) {
 
       // Load default 404 page
-      fs.readFile('views/not_found.html', "binary", function(err, file) {
+      fs.readFile(__dirname + '/views/not_found.html', "binary", function(err, file) {
         // Error while loading the error page: great job devs!
         if(err){
           response.writeHead(500, {"Content-Type": "text/plain"});
