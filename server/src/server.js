@@ -253,14 +253,14 @@ router.route('/events/synchronize/all')
         if(evt.status) ics_file += "STATUS:" + evt.status + "\r\n";
 
         var ics_file_recur = "";
-        if(evt.recurFreq) ics_file_recur += "FREQ=" + evt.recurFreq + ";\r\n";
-        if(evt.recurInterval) ics_file_recur += "INTERVAL=" + evt.recurInterval + ";\r\n";
-        if(evt.recurCount) ics_file_recur += "COUNT=" + evt.recurCount + ";\r\n";
-        if(evt.recurUntil) ics_file_recur += "UNTIL=" + evt.recurUntil.toISOString().replace(/[^\w\s]/gi, '') + ";\r\n";
-        if(evt.recurByDay) ics_file_recur += "BYDAY=" + evt.recurByDay + ";\r\n";
-        if(evt.recurByMonthDay) ics_file_recur += "BYMONTHDAY=" + evt.recurByMonthDay + ";\r\n";
-        if(evt.recurByMonth) ics_file_recur += "BYMONTH=" + evt.recurByMonth + ";\r\n";
-        if(evt.recurWeekStart) ics_file_recur += "WKST=" + evt.recurWeekStart + ";\r\n";
+        if(evt.recurFreq) ics_file_recur += "FREQ=" + evt.recurFreq + ";";
+        if(evt.recurInterval) ics_file_recur += "INTERVAL=" + evt.recurInterval + ";";
+        if(evt.recurCount) ics_file_recur += "COUNT=" + evt.recurCount + ";";
+        if(evt.recurUntil) ics_file_recur += "UNTIL=" + evt.recurUntil.toISOString().replace(/[^\w\s]/gi, '') + ";";
+        if(evt.recurByDay) ics_file_recur += "BYDAY=" + evt.recurByDay + ";";
+        if(evt.recurByMonthDay) ics_file_recur += "BYMONTHDAY=" + evt.recurByMonthDay + ";";
+        if(evt.recurByMonth) ics_file_recur += "BYMONTH=" + evt.recurByMonth + ";";
+        if(evt.recurWeekStart) ics_file_recur += "WKST=" + evt.recurWeekStart + ";";
 
         if(ics_file_recur) ics_file += "RRULE:" + ics_file_recur.substring(0, ics_file_recur.length - 1) + "\r\n";
 
