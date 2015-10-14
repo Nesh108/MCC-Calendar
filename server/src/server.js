@@ -10,8 +10,8 @@ var http = require('http');
 var path = require('path');
 var url = require('url');
 
-var port_api = process.env.PORT || 9090;  // Port for API requests
-var port_web = process.env.PORT || 8080;  // Post for web requests
+var port_api = process.env.PORT || 8080;  // Port for API requests
+var port_web = process.env.PORT || 8081;  // Post for web requests
 
 var WEB_DIR = __dirname + '/views';  // Folder for web pages
 
@@ -234,12 +234,14 @@ router.route('/events/searches')
 
 router.route('/events/synchronize/all')
 
-  .get(authController.authorized, function(req, res){
-
+//  .get(authController.authorized, function(req, res){
+  .get(function(req, res){
+	
     var ics_file = "BEGIN:VCALENDAR\r\nMETHOD:PUBLISH\r\nPRODID:-//nesh//NONSGML v1.0//EN\r\nVERSION:2.0\r\n";
 
     // First simple version
-    Event.find({owner:req.user.username}).stream()
+//    Event.find({owner:req.user.username}).stream()
+    Event.find({owner:req.query.user}).stream()
       .on('data', function(evt){
         ics_file += "BEGIN:VEVENT\r\n" +
             "UID:" + evt._id + "\r\n" +
