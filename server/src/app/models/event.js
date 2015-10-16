@@ -11,11 +11,19 @@ var EventSchema = new Schema({
     location: { type: String },                     // Event location
     dateStart: { type: Date, required: true },      // When the series of event starts
     dateEnd: { type: Date },                        // When the series of event ends
+
     recurCount: { type: Number },                   // How many times the event will recur. 0 for one-time. Blank for open ended.
-    periodFreq: { type: Number },                   // How many days/weeks/months/years between recurrences
-    periodId: { type: Number },                     // 0: days, 1: weeks, 2: months, 3: years
-    status: { type: String, default: "Available"},  // Status ('Available, 'Busy', ...)
-    visibile: { type: Boolean, default: true }      // Public or Private
+    recurFreq: { type: String },                    // Event frequency: DAILY, WEEKLY, MONTHLY, YEARLY
+    recurInterval: { type: Number },                // Interval between occurrences
+    recurUntil: { type: Date },                     // Last day this event should be repeated
+    recurByDay: { type: String },                   // On which day the occurrence should happen: MO, TU, WE... or 1FR (first friday). Please note you can specify more than one by separating with a comma.
+    recurByMonthDay: { type: String },              // On which day of the month the occurrence should happen: 1, 2, 5... To specify more than one provide a list: 1,5,20
+    recurByMonth: { type: String },                 // On which month the occurrence should happen: 1, 2, 5... To specify more than one provide a list: 1,5,12
+    recurWeekStart: { type: String },               // Specify on which day the week should start: SU, MO...
+
+    status: { type: String },                       // Status: TENTATIVE, CONFIRMED, CANCELLED, NEEDS-ACTION, COMPLETED, DRAFT...
+    scope: { type: String, default: "PUBLIC" },     // PUBLIC, PRIVATE or CONFIDENTIAL
+    owner: {type: String, required: true}           // user who created the event
 });
 
 module.exports = mongoose.model('Event', EventSchema);

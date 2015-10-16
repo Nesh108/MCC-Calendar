@@ -10,10 +10,10 @@ var http = require('http');
 var path = require('path');
 var url = require('url');
 
-var port_api = process.env.PORT || 9090;  // Port for API requests
-var port_web = process.env.PORT || 8080;  // Post for web requests
+var port_api = process.env.PORT || 8080;  // Port for API requests
+var port_web = process.env.PORT || 8081;  // Post for web requests
 
-var WEB_DIR = 'views';  // Folder for web pages
+var WEB_DIR = __dirname + '/views';  // Folder for web pages
 
 //////////////////////
 // Configure MongoDB
@@ -23,6 +23,15 @@ var config = require('./deploy/config');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://' + config.db.user_name + ':' + config.db.password + '@' + config.db.URI);
 var Event = require('./app/models/event');
+var User = require('./app/models/user');
+
+//////////////////////
+// Configure passport
+//////////////////////
+
+var passport = require('passport');
+var authController = require('./controllers/auth');
+app.use(passport.initialize());
 
 //////////////////////
 // Configure body parser
@@ -40,14 +49,44 @@ var router = express.Router();  // Router for RESTful api
 ////////////////////////////////////////////////////////////////
 
 //////////////////////
-// Requests logging
+// Middleware
 //////////////////////
 
 router.use(function(req, res, next) {
-  // TODO: Check if user is authorized
-    console.log('API request!');
-    next();
+  console.log('API request!');
+  next();
 });
+
+//////////////////////
+// User route
+//////////////////////
+
+router.route('/users')
+
+  // Create a new user (POST)
+  .post(function(req, res) {
+    var user = new User({
+      username: req.body.username,
+      password: req.body.password
+    });
+
+    user.save(function(err) {
+      if (err)
+        res.send(err);
+
+      res.json({ message: 'User created successfully!' });
+    });
+  })
+
+  // Get all users (GET) TODO: remove this in in final product
+  .get(authController.authorized, function(req, res) {
+    User.find(function(err, users) {
+      if (err)
+        res.send(err);
+
+      res.json(users);
+    });
+  });
 
 ///////////////////////////////
 // Root route: Welcome message
@@ -64,7 +103,7 @@ router.get('/', function(req, res) {
 router.route('/events')
 
   // Create a new event (POST)
-  .post(function(req, res) {
+  .post(authController.authorized, function(req, res) {
 
     var evt = new Event();
     evt.name = req.body.name;
@@ -72,11 +111,19 @@ router.route('/events')
     evt.location = req.body.location;
     evt.dateStart = req.body.dateStart;
     evt.dateEnd = req.body.dateEnd;
+
     evt.recurCount = req.body.recurCount;
-    evt.periodFreq = req.body.periodFreq;
-    evt.periodId = req.body.periodId;
+    evt.recurFreq = req.body.recurFreq;
+    evt.recurInterval = req.body.recurInterval;
+    evt.recurUntil = req.body.recurUntil;
+    evt.recurByDay = req.body.recurByDay;
+    evt.recurByMonthDay = req.body.recurByMonthDay;
+    evt.recurByMonth = req.body.recurByMonth;
+    evt.recurWeekStart = req.body.recurWeekStart;
+
     evt.status = req.body.status;
-    evt.visibile = req.body.visibile;
+    evt.scope = req.body.scope;
+    evt.owner = req.user.username;
 
     evt.save(function(err) {
       if(err)
@@ -86,9 +133,9 @@ router.route('/events')
     });
   })
 
-  // Get all events (GET)
-  .get(function(req, res) {
-    Event.find(function(err, events) {
+  // Get all events of a specific user (GET)
+  .get(authController.authorized, function(req, res) {
+    Event.find({owner:req.user.username}, function(err, events) {
       if(err)
         res.send(err);
 
@@ -103,17 +150,18 @@ router.route('/events')
 router.route('/events/:event_id')
 
     // Read specific event (GET)
-    .get(function(req, res) {
+    .get(authController.authorized, function(req, res) {
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
           res.send(err);
+
 
         res.json(evt);
       });
     })
 
     // Update specific event (PUT)
-    .put(function(req, res) {
+    .put(authController.authorized, function(req, res) {
 
       Event.findById(req.params.event_id, function(err, evt) {
         if(err)
@@ -141,7 +189,7 @@ router.route('/events/:event_id')
     })
 
     // Delete specific event (DELETE)
-    .delete(function(req, res) {
+    .delete(authController.authorized, function(req, res) {
       Event.remove({
         _id: req.params.event_id
       }, function(err, evt) {
@@ -161,7 +209,9 @@ router.route('/events/:event_id')
 
 router.route('/events/searches')
 
-  .post(function(req, res){
+  .post(authController.authorized, function(req, res){
+
+    req.body["owner"] = req.user.username;
 
     Event.find(req.body).exec(function(err, evts){
 
@@ -184,21 +234,40 @@ router.route('/events/searches')
 
 router.route('/events/synchronize/all')
 
+//  .get(authController.authorized, function(req, res){
   .get(function(req, res){
-
-    var ics_file = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nPRODID:-//nesh//NONSGML v1.0//EN\nVERSION:2.0\n";
+	
+    var ics_file = "BEGIN:VCALENDAR\r\nMETHOD:PUBLISH\r\nPRODID:-//nesh//NONSGML v1.0//EN\r\nVERSION:2.0\r\n";
 
     // First simple version
-    Event.find({}).stream()
+//    Event.find({owner:req.user.username}).stream()
+    Event.find({owner:req.query.user}).stream()
       .on('data', function(evt){
-        ics_file += "BEGIN:VEVENT\n" +
-            "UID:" + evt._id + "\n" +
-            "DTSTAMP:" + new Date().toISOString() + "\n" +
-            "DTSTART:" + evt.dateStart.toISOString() + "\n" +
-            "SUMMARY:" + evt.name + "\n" +
-            "DESCRIPTION:" + evt.description + "\n" +
-            "CLASS:PUBLIC\n" +
-            "END:VEVENT\n";
+        ics_file += "BEGIN:VEVENT\r\n" +
+            "UID:" + evt._id + "\r\n" +
+            "DTSTAMP:" + new Date().toISOString().replace(/[^\w\s]/gi, '') + "\r\n" +
+            "DTSTART:" + evt.dateStart.toISOString().replace(/[^\w\s]/gi, '') + "\r\n" +
+            "SUMMARY:" + evt.name + "\r\n" +
+            "DESCRIPTION:" + evt.description + "\r\n";
+
+        if(evt.location) ics_file += "LOCATION:" + evt.location + "\r\n";
+        if(evt.dateEnd) ics_file += "DTEND:" + evt.dateEnd.toISOString().replace(/[^\w\s]/gi, '') + "\r\n";
+        if(evt.status) ics_file += "STATUS:" + evt.status + "\r\n";
+
+        var ics_file_recur = "";
+        if(evt.recurFreq) ics_file_recur += "FREQ=" + evt.recurFreq + ";";
+        if(evt.recurInterval) ics_file_recur += "INTERVAL=" + evt.recurInterval + ";";
+        if(evt.recurCount) ics_file_recur += "COUNT=" + evt.recurCount + ";";
+        if(evt.recurUntil) ics_file_recur += "UNTIL=" + evt.recurUntil.toISOString().replace(/[^\w\s]/gi, '') + ";";
+        if(evt.recurByDay) ics_file_recur += "BYDAY=" + evt.recurByDay + ";";
+        if(evt.recurByMonthDay) ics_file_recur += "BYMONTHDAY=" + evt.recurByMonthDay + ";";
+        if(evt.recurByMonth) ics_file_recur += "BYMONTH=" + evt.recurByMonth + ";";
+        if(evt.recurWeekStart) ics_file_recur += "WKST=" + evt.recurWeekStart + ";";
+
+        if(ics_file_recur) ics_file += "RRULE:" + ics_file_recur.substring(0, ics_file_recur.length - 1) + "\r\n";
+
+        if(evt.scope) ics_file += "CLASS:" + evt.scope + "\r\n";
+        ics_file += "END:VEVENT\r\n";
       })
       .on('error', function(err){
         res.send(err);
@@ -238,11 +307,11 @@ http.createServer(function(request, response) {
     if(!exists) {
 
       // Load default 404 page
-      fs.readFile('views/not_found.html', "binary", function(err, file) {
+      fs.readFile(__dirname + '/views/not_found.html', "binary", function(err, file) {
         // Error while loading the error page: great job devs!
         if(err){
           response.writeHead(500, {"Content-Type": "text/plain"});
-          response.write(err + "\n");
+          response.write(err + "\r\n");
           response.end();
           return;
         }
@@ -262,7 +331,7 @@ http.createServer(function(request, response) {
     fs.readFile(filename, "binary", function(err, file) {
       if(err){
         response.writeHead(500, {"Content-Type": "text/plain"});
-        response.write(err + "\n");
+        response.write(err + "\r\n");
         response.end();
         return;
       }
