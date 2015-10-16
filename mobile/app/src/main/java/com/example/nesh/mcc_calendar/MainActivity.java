@@ -1,6 +1,7 @@
 package com.example.nesh.mcc_calendar;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +19,10 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -142,6 +148,37 @@ public class MainActivity extends AppCompatActivity
             super.onAttach(activity);
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
+        }
+    }
+
+    public void sendRequest(View v) {
+
+        SendRESTRequest job = new SendRESTRequest();
+        job.execute("");
+    }
+
+    private class SendRESTRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String[] params) {
+            RestClient client = new RestClient(getResources().getString(R.string.rest_base_uri) + params[0]);  //Write your url here
+            // client.addParam("Name", "Bhavit");
+
+            client.addHeader("content-type", "application/json"); // Here I am specifying that the key-value pairs are sent in the JSON format
+
+            return client.executeGet();
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            try {
+
+                JSONObject response = new JSONObject(message);
+                Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
