@@ -11,3 +11,8 @@ Calendar for the Mobile Cloud Computing course at Aalto University (Espoo, Finla
 - Execute `npm install` in the main folder (/server/src)
 - Add the username, password and URI of your MongoDB instance (/server/deploy/config.js)
 - Execute `node server.js` to start the server
+
+
+### API Routes
+
+Check [here](https://github.com/Nesh108/MCC-Calendar/blob/master/docs/routes) for the API documentation.
