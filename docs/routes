@@ -1,10 +1,12 @@
 == API Routes ==
 
-/
+/api
   GET: Welcome message
 
+--------------------------------- 
+ Events
 ---------------------------------
-
+ 
 /api/events
   GET: Get all existing events
   POST: Create a new event
@@ -22,7 +24,6 @@
     recurUntil: 2016-11-01
     recurWeekStart: SU
 
-
 ---------------------------------
 
 /api/events/:event_id
@@ -37,7 +38,21 @@
 
 ---------------------------------
 
-/api/events/synchronize/all
+/api/events/synchronize/all?user=<USERNAME>[&nocache=true]
   GET: Get iCal export
+  
+  Note: To import in Google Calendar without caching append '&nocache=true'
+  
+---------------------------------
+Users
+---------------------------------
 
+/api/users
+  GET: Get all existing users
+  POST: Create a new user
+  
+  EXAMPLE:
+    username: user1
+    password: 2up3R_s7r0ng_p4ssw0r1)
+  
 ---------------------------------
