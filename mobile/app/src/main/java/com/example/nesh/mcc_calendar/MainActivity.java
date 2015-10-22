@@ -1,6 +1,9 @@
 package com.example.nesh.mcc_calendar;
 
+import android.annotation.TargetApi;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,14 +19,28 @@ import android.widget.Toast;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.util.CompatibilityHints;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -256,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_example) {
-            Toast.makeText(this, "LOLLO_TRUE", Toast.LENGTH_LONG).show();
+            getCalendar();
             return true;
         }
 
@@ -270,17 +287,17 @@ public class MainActivity extends AppCompatActivity {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void sendRequest(View v) {
+    public void getCalendar() {
 
         SendRESTRequest job = new SendRESTRequest();
-        job.execute("");
+        job.execute("nesh");
     }
 
     private class SendRESTRequest extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String[] params) {
-            RestClient client = new RestClient(getResources().getString(R.string.rest_base_uri) + params[0]);  //Write your url here
+            RestClient client = new RestClient(getResources().getString(R.string.rest_base_uri) + "?user=" + params[0]);  //Write your url here
             // client.addParam("Name", "Bhavit");
 
             client.addHeader("content-type", "application/json"); // Here I am specifying that the key-value pairs are sent in the JSON format
@@ -288,14 +305,48 @@ public class MainActivity extends AppCompatActivity {
             return client.executeGet();
         }
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         @Override
         protected void onPostExecute(String message) {
             try {
 
-                JSONObject response = new JSONObject(message);
-                Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+                /*JSONObject response = new JSONObject(message);
+                Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
 
-            } catch (JSONException e) {
+
+                InputStream in = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+
+                CalendarBuilder builder = new CalendarBuilder();
+
+                // To fix 'Unparseable date' error
+                CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
+
+                net.fortuna.ical4j.model.Calendar calendar = builder.build(in);
+
+                for (Iterator i = calendar.getComponents().iterator(); i.hasNext();) {
+                    Component component = (Component) i.next();
+                    System.out.println("Component [" + component.getName() + "]");
+
+                    for (Iterator j = component.getProperties().iterator(); j.hasNext();) {
+                        Property property = (Property) j.next();
+                        System.out.println("Property [" + property.getName() + ", " + property.getValue() + "]");
+
+                        if(property.getName().equals("DTSTART"))
+                        {
+                            caldroidFragment.setBackgroundResourceForDate(R.color.red, new net.fortuna.ical4j.model.Date(property.getValue()));
+
+                        }
+                    }
+                }
+                caldroidFragment.refreshView();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (ParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
         }

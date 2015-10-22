@@ -3,6 +3,6 @@
     <string name="action_synch">Synch</string>
     <string name="action_settings">Settings</string>
 
-    <string name="rest_base_uri">http://mcc-calendar.ddns.net:8080/api/</string>
+    <string name="rest_base_uri">http://mcc-calendar.ddns.net:8080/api/events/synchronize/all</string>
 
 </resources>
