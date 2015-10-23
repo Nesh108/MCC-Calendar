@@ -1,13 +1,13 @@
 package com.example.nesh.mcc_calendar;
 
 import android.annotation.TargetApi;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,14 +22,9 @@ import com.roomorama.caldroid.CaldroidListener;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.util.CompatibilityHints;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
     final CaldroidFragment caldroidFragment = new CaldroidFragment();
     private CaldroidFragment dialogCaldroidFragment;
+
+    private ArrayList<Event> eventsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -325,19 +322,42 @@ public class MainActivity extends AppCompatActivity {
 
                 for (Iterator i = calendar.getComponents().iterator(); i.hasNext();) {
                     Component component = (Component) i.next();
-                    System.out.println("Component [" + component.getName() + "]");
+                    Log.d("ICal","Component [" + component.getName() + "]");
 
-                    for (Iterator j = component.getProperties().iterator(); j.hasNext();) {
-                        Property property = (Property) j.next();
-                        System.out.println("Property [" + property.getName() + ", " + property.getValue() + "]");
+                    // Getting data from iCal to create a new event
+                    String _id = component.getProperty("UID").getValue();
+                    String summary = component.getProperty("SUMMARY").getValue();
+                    String description = component.getProperty("DESCRIPTION").getValue();
+                    String location = component.getProperty("LOCATION").getValue();
+                    String visibility = component.getProperty("CLASS").getValue();
+                    String freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
+                    String weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
 
-                        if(property.getName().equals("DTSTART"))
-                        {
-                            caldroidFragment.setBackgroundResourceForDate(R.color.red, new net.fortuna.ical4j.model.Date(property.getValue()));
+                    int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
 
-                        }
+                    net.fortuna.ical4j.model.Date dateStart = new net.fortuna.ical4j.model.Date(component.getProperty("DTSTART").getValue());
+                    net.fortuna.ical4j.model.Date dateEnd = new net.fortuna.ical4j.model.Date(component.getProperty("DTEND").getValue());
+                    net.fortuna.ical4j.model.Date until = new net.fortuna.ical4j.model.Date(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1]);
+
+                    // Create a new event
+                    Event e = new Event(_id, dateStart, summary, description, location, dateEnd, freq, weekStart, until, interval, visibility);
+
+                    // Check if event is not already present
+                    if(!eventsList.contains(e)) {
+
+                        // Add event to list
+                        eventsList.add(e);
+
+                        // Add event to calendar
+                        caldroidFragment.setBackgroundResourceForDate(R.color.red, new net.fortuna.ical4j.model.Date(e.getDateStart()));
+
+                        Log.d("iCal", "Event " + e.toString() + " added to calendar.");
                     }
+                    else
+                        Log.d("iCal", "Event " + e.get_id() + " already in the list. Not added to calendar.");
                 }
+
+                // Refresh calendar view
                 caldroidFragment.refreshView();
 
             } catch (FileNotFoundException e) {
