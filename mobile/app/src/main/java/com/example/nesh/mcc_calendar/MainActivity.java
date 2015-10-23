@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
@@ -25,23 +24,25 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.util.CompatibilityHints;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.TimeZone;
 
+/**
+ * Created by Alberto Vaccari on 23-Oct-15.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private boolean undo = false;
-
-    private static final DateFormat FORMATTER = SimpleDateFormat.getDateInstance();
 
     final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
     final CaldroidFragment caldroidFragment = new CaldroidFragment();
@@ -49,15 +50,24 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Event> eventsList = new ArrayList<>();
 
+    private DBHandler dbHandler = new DBHandler(this);
+
+
+    // Testing
+    // TODO: Replace with ListView
+    private TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
-        // Setup arguments
+        // Setup Events
+        setupEvents();
 
         // If Activity is created after rotation
         if (savedInstanceState != null) {
@@ -85,8 +95,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSelectDate(Date date, View view) {
-                Toast.makeText(getApplicationContext(), formatter.format(date),
-                        Toast.LENGTH_SHORT).show();
+                String eventsText = "";
+
+                // Setup Date Formatter
+                DateFormat format = new SimpleDateFormat("HH:mm:ss");
+                format.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+
+                for(Event e : getEvents(date)){
+                    eventsText += " - " + e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" +  format.format(e.getDateStart()) +"\n";
+                }
+
+                textView.setText(eventsText);
 
             }
 
@@ -119,12 +138,13 @@ public class MainActivity extends AppCompatActivity {
         caldroidFragment.setCaldroidListener(listener);
 
 
+        // TODO: REMOVE THIS
         // Testing Stuff
         //-------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------
 
-        final TextView textView = (TextView) findViewById(R.id.textview);
+        textView = (TextView) findViewById(R.id.textview);
         final Button customizeButton = (Button) findViewById(R.id.customize_button);
 
         // Customize the calendar
@@ -174,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 Date toDate = cal.getTime();
 
                 // Set disabled dates
-                ArrayList<Date> disabledDates = new ArrayList<Date>();
+                ArrayList<Date> disabledDates = new ArrayList<>();
                 for (int i = 5; i < 8; i++) {
                     cal = Calendar.getInstance();
                     cal.add(Calendar.DATE, i);
@@ -284,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void getCalendar() {
+    private void getCalendar() {
 
         SendRESTRequest job = new SendRESTRequest();
         job.execute("nesh");
@@ -302,73 +322,125 @@ public class MainActivity extends AppCompatActivity {
             return client.executeGet();
         }
 
-        @TargetApi(Build.VERSION_CODES.KITKAT)
         @Override
         protected void onPostExecute(String message) {
-            try {
+            processEvents(message);
+        }
+    }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void processEvents(String events){
+        try {
                 /*JSONObject response = new JSONObject(message);
                 Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
 
 
-                InputStream in = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+            InputStream in = new ByteArrayInputStream(events.getBytes(StandardCharsets.UTF_8));
 
-                CalendarBuilder builder = new CalendarBuilder();
+            CalendarBuilder builder = new CalendarBuilder();
 
-                // To fix 'Unparseable date' error
-                CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
+            // To fix 'Unparseable date' error
+            CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true);
 
-                net.fortuna.ical4j.model.Calendar calendar = builder.build(in);
+            net.fortuna.ical4j.model.Calendar calendar = builder.build(in);
 
-                for (Iterator i = calendar.getComponents().iterator(); i.hasNext();) {
-                    Component component = (Component) i.next();
-                    Log.d("ICal","Component [" + component.getName() + "]");
+            // Go through events in iCal file
+            for (Object o : calendar.getComponents()) {
+                Component component = (Component) o;
+                Log.d("ICal", "Component [" + component.getName() + "]");
 
-                    // Getting data from iCal to create a new event
-                    String _id = component.getProperty("UID").getValue();
-                    String summary = component.getProperty("SUMMARY").getValue();
-                    String description = component.getProperty("DESCRIPTION").getValue();
-                    String location = component.getProperty("LOCATION").getValue();
-                    String visibility = component.getProperty("CLASS").getValue();
-                    String freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
-                    String weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
+                // Getting data from iCal to create a new event
+                String _id = component.getProperty("UID").getValue();
+                String summary = component.getProperty("SUMMARY").getValue();
+                String description = component.getProperty("DESCRIPTION").getValue();
+                String location = component.getProperty("LOCATION").getValue();
+                String visibility = component.getProperty("CLASS").getValue();
+                String freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
+                String weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
 
-                    int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
+                int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
 
-                    net.fortuna.ical4j.model.Date dateStart = new net.fortuna.ical4j.model.Date(component.getProperty("DTSTART").getValue());
-                    net.fortuna.ical4j.model.Date dateEnd = new net.fortuna.ical4j.model.Date(component.getProperty("DTEND").getValue());
-                    net.fortuna.ical4j.model.Date until = new net.fortuna.ical4j.model.Date(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1]);
+                net.fortuna.ical4j.model.Date dateStart = new net.fortuna.ical4j.model.Date(component.getProperty("DTSTART").getValue());
+                net.fortuna.ical4j.model.Date dateEnd = new net.fortuna.ical4j.model.Date(component.getProperty("DTEND").getValue());
+                net.fortuna.ical4j.model.Date until = new net.fortuna.ical4j.model.Date(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1]);
 
-                    // Create a new event
-                    Event e = new Event(_id, dateStart, summary, description, location, dateEnd, freq, weekStart, until, interval, visibility);
+                // Create a new event
+                Event e = new Event(_id, summary, description, location, visibility, freq, weekStart, dateStart, dateEnd, until, interval);
 
-                    // Check if event is not already present
-                    if(!eventsList.contains(e)) {
+                // Check if event is not already present
+                if (!eventsList.contains(e)) {
 
-                        // Add event to list
-                        eventsList.add(e);
+                    // Add event to list
+                    eventsList.add(e);
 
-                        // Add event to calendar
-                        caldroidFragment.setBackgroundResourceForDate(R.color.red, new net.fortuna.ical4j.model.Date(e.getDateStart()));
+                    // Add event to the local DB
+                    dbHandler.createEvent(e);
 
-                        Log.d("iCal", "Event " + e.toString() + " added to calendar.");
-                    }
-                    else
-                        Log.d("iCal", "Event " + e.get_id() + " already in the list. Not added to calendar.");
-                }
-
-                // Refresh calendar view
-                caldroidFragment.refreshView();
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (ParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
+                } else
+                    Log.d("iCal", "Event " + e.get_id() + " already in the list. Not added to calendar.");
             }
+
+            // Show fetched events in the calendar
+            showEvents();
+
+
+        } catch (ParserException | ParseException | IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    private void setupEvents(){
+        try {
+            dbHandler.open();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Fetch already existing events
+        try {
+            eventsList = dbHandler.getAllEvents();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        showEvents();
+    }
+
+    private void showEvents(){
+
+        // Add event to calendar
+        for(Event e : eventsList) {
+
+            for(Date d : getDatesRange(e))
+                caldroidFragment.setBackgroundResourceForDate(R.color.red, d);
+
+            Log.d("iCal", "Event " + e.toString() + " added to calendar.");
+        }
+
+        // Refresh calendar view
+        caldroidFragment.refreshView();
+    }
+
+    private ArrayList<Date> getDatesRange(Event e){
+        ArrayList<Date> dates = new ArrayList<>();
+
+        // TODO: Do a better job than this
+        // Calculate what are the dates in which the event happens
+        dates.add(e.getDateStart());
+        dates.add(e.getUntil());
+
+        return dates;
+    }
+
+    // Finds all the events of a specific date
+    private ArrayList<Event> getEvents(Date d){
+        ArrayList<Event> events = new ArrayList<>();
+
+        for(Event e : eventsList){
+            if(getDatesRange(e).contains(d))
+                events.add(e);
+        }
+
+        return events;
     }
 }

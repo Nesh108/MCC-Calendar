@@ -2,8 +2,10 @@ package com.example.nesh.mcc_calendar;
 
 import net.fortuna.ical4j.model.Date;
 
+import java.text.ParseException;
+
 /**
- * Created by nesh on 23-Oct-15.
+ * Created by Alberto Vaccari on 23-Oct-15.
  */
 
 public class Event {
@@ -28,7 +30,15 @@ public class Event {
         return _id.hashCode();
     }
 
-    public Event(String _id, Date dateStart, String summary, String description, String location, Date dateEnd, String freq, String weekStart, Date until, int interval, String visibility){
+    public Event(String _id, String summary, String description, String location, String visibility, String freq, String weekStart, String dateStart, String dateEnd, String until, String interval) throws ParseException {
+        this(_id, summary, description, location, visibility, freq, weekStart, new Date(dateStart), new Date(dateEnd), new Date(until), Integer.parseInt(interval));
+    }
+
+    public Event(String _id, String summary, String description, String location, String visibility, String freq, String weekStart, String dateStart, String dateEnd, String until, int interval) throws ParseException {
+        this(_id, summary, description, location, visibility, freq, weekStart, new Date(dateStart), new Date(dateEnd), new Date(until), interval);
+    }
+
+    public Event(String _id, String summary, String description, String location, String visibility, String freq, String weekStart, Date dateStart, Date dateEnd, Date until, int interval){
         this._id = _id;
         this.dateStart = dateStart;
         this.summary = summary;
