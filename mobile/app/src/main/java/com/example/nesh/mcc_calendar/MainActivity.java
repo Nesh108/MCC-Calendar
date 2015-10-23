@@ -34,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.TimeZone;
 
 /**
@@ -436,9 +435,16 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Event> getEvents(Date d){
         ArrayList<Event> events = new ArrayList<>();
 
+        String refDate = new SimpleDateFormat("dd/MM/yyyy").format(d);
+
         for(Event e : eventsList){
-            if(getDatesRange(e).contains(d))
-                events.add(e);
+            for(Date d1 : getDatesRange(e))
+            {
+                String date = new SimpleDateFormat("dd/MM/yyyy").format(d1);
+                if(refDate.equals(date))
+                    events.add(e);
+
+            }
         }
 
         return events;
