@@ -176,7 +176,7 @@ router.route('/events/:event_id')
         evt.periodFreq = req.body.periodFreq;
         evt.periodId = req.body.periodId;
         evt.status = req.body.status;
-        evt.scope = req.body.visibility;
+        evt.scope = req.body.scope;
 
         evt.save(function(err) {
           if(err)
