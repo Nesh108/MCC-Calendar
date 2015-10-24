@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -192,6 +193,9 @@ public class ListEventsActivity extends AppCompatActivity {
         } else if (id == R.id.action_about){
             showAboutDialog();
             return true;
+        } else if (id == R.id.action_import) {
+            Toast.makeText(this, "Import Wizard...", Toast.LENGTH_LONG).show();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -207,7 +211,7 @@ public class ListEventsActivity extends AppCompatActivity {
     private void getCalendar() {
 
         SendSynchronizeRequest job = new SendSynchronizeRequest();
-        job.execute(getResources().getString(R.string.username));
+        job.execute(PrefUtils.getFromPrefs(ListEventsActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"));
     }
 
 
@@ -342,7 +346,7 @@ public class ListEventsActivity extends AppCompatActivity {
             client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
-            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String credentials = PrefUtils.getFromPrefs(ListEventsActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__") + ":" + PrefUtils.getFromPrefs(ListEventsActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__");
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
             Log.d("AUTH", base64EncodedCredentials);
@@ -406,7 +410,7 @@ public class ListEventsActivity extends AppCompatActivity {
             client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
-            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String credentials = PrefUtils.getFromPrefs(ListEventsActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__") + ":" + PrefUtils.getFromPrefs(ListEventsActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__");
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
             Log.d("AUTH", base64EncodedCredentials);

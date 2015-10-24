@@ -66,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Date selectedDate;
 
+    private String usr, pass;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,14 +78,20 @@ public class MainActivity extends AppCompatActivity {
         assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
+        if (PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__").equals("__UNKNOWN__")) {
+            showLoginDialog();
+        }
+        else
+            Toast.makeText(MainActivity.this, "Welcome back " + PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"), Toast.LENGTH_SHORT).show();
+
 
         // CALENDAR TEST
         CalendarProvider calendarProvider = new CalendarProvider(this);
         List<me.everything.providers.android.calendar.Calendar> calendars = calendarProvider.getCalendars().getList();
 
-        for(me.everything.providers.android.calendar.Calendar c : calendars){
+        for (me.everything.providers.android.calendar.Calendar c : calendars) {
             Log.d("CALENDAR", c.displayName);
-            for(me.everything.providers.android.calendar.Event e : calendarProvider.getEvents(c.id).getList())
+            for (me.everything.providers.android.calendar.Event e : calendarProvider.getEvents(c.id).getList())
                 Log.d("EVENTS", e.title + " - " + e.description);
         }
 
@@ -123,9 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChangeMonth(int month, int year) {
-                String text = "month: " + month + " year: " + year;
-                Toast.makeText(getApplicationContext(), text,
-                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -248,9 +254,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCaldroidViewCreated() {
                 if (caldroidFragment.getLeftArrowButton() != null) {
-                    Toast.makeText(getApplicationContext(),
-                            "Caldroid view is created", Toast.LENGTH_SHORT)
-                            .show();
+
                 }
             }
 
@@ -362,91 +366,7 @@ public class MainActivity extends AppCompatActivity {
         //-------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------
 
-   /*     final Button customizeButton = (Button) findViewById(R.id.customize_button);
-
-        // Customize the calendar
-        customizeButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                *//*if (undo) {
-                    customizeButton.setText("Customize");
-                    //textView.setText("");
-
-                    // Reset calendar
-                    caldroidFragment.clearDisableDates();
-                    caldroidFragment.clearSelectedDates();
-                    caldroidFragment.setMinDate(null);
-                    caldroidFragment.setMaxDate(null);
-                    caldroidFragment.setShowNavigationArrows(true);
-                    caldroidFragment.setEnableSwipe(true);
-                    caldroidFragment.refreshView();
-                    undo = false;
-                    return;
-                }
-
-                // Else
-                undo = true;
-                customizeButton.setText("Undo");
-                Calendar cal = Calendar.getInstance();
-
-                // Min date is last 7 days
-                cal.add(Calendar.DATE, -7);
-                Date minDate = cal.getTime();
-
-                // Max date is next 7 days
-                cal = Calendar.getInstance();
-                cal.add(Calendar.DATE, 14);
-                Date maxDate = cal.getTime();
-
-                // Set selected dates
-                // From Date
-                cal = Calendar.getInstance();
-                cal.add(Calendar.DATE, 2);
-                Date fromDate = cal.getTime();
-
-                // To Date
-                cal = Calendar.getInstance();
-                cal.add(Calendar.DATE, 3);
-                Date toDate = cal.getTime();
-
-                // Set disabled dates
-                ArrayList<Date> disabledDates = new ArrayList<>();
-                for (int i = 5; i < 8; i++) {
-                    cal = Calendar.getInstance();
-                    cal.add(Calendar.DATE, i);
-                    disabledDates.add(cal.getTime());
-                }
-
-                // Customize
-                caldroidFragment.setMinDate(minDate);
-                caldroidFragment.setMaxDate(maxDate);
-                caldroidFragment.setDisableDates(disabledDates);
-                caldroidFragment.setSelectedDates(fromDate, toDate);
-                caldroidFragment.setShowNavigationArrows(false);
-                caldroidFragment.setEnableSwipe(false);
-
-                caldroidFragment.refreshView();
-
-                // Move to date
-                // cal = Calendar.getInstance();
-                // cal.add(Calendar.MONTH, 12);
-                // caldroidFragment.moveToDate(cal.getTime());
-
-                String text = "Today: " + formatter.format(new Date()) + "\n";
-                text += "Min Date: " + formatter.format(minDate) + "\n";
-                text += "Max Date: " + formatter.format(maxDate) + "\n";
-                text += "Select From Date: " + formatter.format(fromDate)
-                        + "\n";
-                text += "Select To Date: " + formatter.format(toDate) + "\n";
-                for (Date date : disabledDates) {
-                    text += "Disabled Date: " + formatter.format(date) + "\n";
-                }
-
-               // textView.setText(text);*//*
-            }
-        });
-
+   /*
         Button showDialogButton = (Button) findViewById(R.id.show_dialog_button);
 
         final Bundle state = savedInstanceState;
@@ -531,6 +451,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_about) {
             showAboutDialog();
             return true;
+        } else if (id == R.id.action_import) {
+            Toast.makeText(this, "Import Wizard...", Toast.LENGTH_LONG).show();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -546,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
     private void getCalendar() {
 
         SendSynchronizeRequest job = new SendSynchronizeRequest();
-        job.execute(getResources().getString(R.string.username));
+        job.execute(PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"));
     }
 
     protected void createEvent(Event e) {
@@ -603,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
             client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
-            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String credentials = PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__") + ":" + PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, "__UNKNOWN__");
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
             Log.d("AUTH", base64EncodedCredentials);
@@ -623,9 +546,6 @@ public class MainActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void processEvents(String events) {
         try {
-                /*JSONObject response = new JSONObject(message);
-                Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
-
 
             InputStream in = new ByteArrayInputStream(events.getBytes(StandardCharsets.UTF_8));
 
@@ -755,7 +675,7 @@ public class MainActivity extends AppCompatActivity {
         for (Event e : eventsList) {
 
             for (Date d : getDatesRange(e))
-                if(e.getVisibility().equals("PUBLIC"))
+                if (e.getVisibility().equals("PUBLIC"))
                     caldroidFragment.setBackgroundResourceForDate(R.color.blue, d);
                 else
                     caldroidFragment.setBackgroundResourceForDate(R.color.red, d);
@@ -821,7 +741,7 @@ public class MainActivity extends AppCompatActivity {
             client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
-            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String credentials = PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__") + ":" + PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__");
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
             Log.d("AUTH", base64EncodedCredentials);
@@ -892,7 +812,7 @@ public class MainActivity extends AppCompatActivity {
             client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
-            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String credentials = PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__") + ":" + PrefUtils.getFromPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__");
             String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
             client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
             Log.d("AUTH", base64EncodedCredentials);
@@ -922,6 +842,51 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    protected void testLogin(String username, String password) {
+
+        TestLoginRequest job = new TestLoginRequest();
+        job.execute(username, password);
+    }
+
+    private class TestLoginRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String[] params) {
+            RestClient client = new RestClient(getResources().getString(R.string.rest_events_uri));
+
+            // Specifying that the key-value pairs are sent in the JSON format
+            client.addHeader("Content-type", "application/x-www-form-urlencoded");
+
+            // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
+            String credentials = params[0] + ":" + params[1];
+            String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+            client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
+            Log.d("AUTH", base64EncodedCredentials);
+
+            Log.d("TEST", params[0] + " = " + params[1]);
+            return client.executePost();
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+
+            if (message.contains("Unauthorized")) {
+                Toast.makeText(MainActivity.this, "Login failed!", Toast.LENGTH_SHORT).show();
+                showLoginDialog();
+            } else {
+                Toast.makeText(MainActivity.this, "Welcome " + usr, Toast.LENGTH_SHORT).show();
+                // Saving user credentials on successful login case
+                PrefUtils.saveToPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, usr);
+                PrefUtils.saveToPrefs(MainActivity.this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, pass);
+
+                usr = null;
+                pass = null;
+            }
+
+
+        }
+    }
+
     private void showAboutDialog() {
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(MainActivity.this);
@@ -940,6 +905,42 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+
+    private void showLoginDialog() {
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+        View promptsView = li.inflate(R.layout.login_prompt, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                MainActivity.this);
+
+        // set xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText usernameEdit = (EditText) promptsView
+                .findViewById(R.id.usernameEdit);
+        final EditText passwordEdit = (EditText) promptsView
+                .findViewById(R.id.passwordEdit);
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Login",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                usr = usernameEdit.getText().toString();
+                                pass = passwordEdit.getText().toString();
+
+                                Toast.makeText(MainActivity.this, "Connecting...", Toast.LENGTH_SHORT).show();
+                                testLogin(usr, pass);
                             }
                         });
 

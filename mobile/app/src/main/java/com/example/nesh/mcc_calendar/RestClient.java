@@ -76,17 +76,14 @@ public class RestClient {
             response = httpClient.execute(httpPost);
             HttpEntity entity1 = response.getEntity();
             result = EntityUtils.toString(entity1);
-            return result;
-            //Toast.makeText(MainPage.this, result, Toast.LENGTH_LONG).show();
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         }
         return result;
 
@@ -106,17 +103,14 @@ public class RestClient {
             response = httpClient.execute(httpPut);
             HttpEntity entity1 = response.getEntity();
             result = EntityUtils.toString(entity1);
-            return result;
-            //Toast.makeText(MainPage.this, result, Toast.LENGTH_LONG).show();
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         }
         return result;
 
@@ -134,17 +128,14 @@ public class RestClient {
             response = httpClient.execute(httpDelete);
             HttpEntity entity1 = response.getEntity();
             result = EntityUtils.toString(entity1);
-            return result;
-            //Toast.makeText(MainPage.this, result, Toast.LENGTH_LONG).show();
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         }
         return result;
 
@@ -162,9 +153,11 @@ public class RestClient {
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return e.getMessage();
         }
 
         return result;
