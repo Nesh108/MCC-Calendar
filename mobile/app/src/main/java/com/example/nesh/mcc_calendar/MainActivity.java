@@ -3,12 +3,14 @@ package com.example.nesh.mcc_calendar;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,12 +18,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -45,14 +45,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by Alberto Vaccari on 23-Oct-15.
  */
 public class MainActivity extends AppCompatActivity {
 
-    final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
     final CaldroidFragment caldroidFragment = new CaldroidFragment();
     private CaldroidFragment dialogCaldroidFragment;
 
@@ -121,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(MainActivity.this);
-                View promptsView = li.inflate(R.layout.event_details_prompt, null);
+                View promptsView = li.inflate(R.layout.create_event_prompt, null);
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                         MainActivity.this);
@@ -139,14 +137,16 @@ public class MainActivity extends AppCompatActivity {
                         .findViewById(R.id.dateStartEdit);
                 final EditText dateEndEdit = (EditText) promptsView
                         .findViewById(R.id.dateEndEdit);
+                final EditText dateUntilEdit = (EditText) promptsView
+                        .findViewById(R.id.dateUntilEdit);
 
                 final EditText freqPicker = (EditText) promptsView
                         .findViewById(R.id.intervalPicker);
                 final Spinner freqSpinner = (Spinner) promptsView
                         .findViewById(R.id.freqSpinner);
 
-                final ToggleButton toggleButton = (ToggleButton) promptsView
-                        .findViewById(R.id.toggleButton);
+                final ToggleButton visibilityToggle = (ToggleButton) promptsView
+                        .findViewById(R.id.visibilityToggle);
 
                 dateStartEdit.setText(date.toString());
 
@@ -162,14 +162,23 @@ public class MainActivity extends AppCompatActivity {
                                         String location = locationEventEdit.getText().toString();
                                         String dateStart = dateStartEdit.getText().toString();
                                         String dateEnd = dateEndEdit.getText().toString();
+                                        String dateUntil = dateUntilEdit.getText().toString();
                                         String interval = "" + freqPicker.getText().toString();
                                         String freq = freqSpinner.getSelectedItem().toString();
                                         String visibility = "PUBLIC";
 
-                                        if(toggleButton.isSelected())
+                                        if(visibilityToggle.isSelected())
                                             visibility = "PRIVATE";
 
-                                        if(!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))){
+                                        try {
+                                            Integer.parseInt(interval);
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            Toast.makeText(MainActivity.this, "Interval must be a number.", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        if(!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))){
 
                                             DateFormat format = new SimpleDateFormat("EE");
                                             try {
@@ -182,8 +191,8 @@ public class MainActivity extends AppCompatActivity {
                                                     default : freq = "DAILY"; break;
                                                 }
 
-                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateEnd, interval);
-                                                Log.d("Event_TEST", e.toString());
+                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
+                                                Log.d("Event_CREATE", e.toString());
                                                 createEvent(e);
 
                                             } catch (ParseException e1) {
@@ -235,15 +244,80 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                Log.d("LIST", "Clicked SHORT");
                 Toast.makeText(MainActivity.this, "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
             }
         });
 
         eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
-                Log.d("LIST", "Clicked LONG");
-                Toast.makeText(MainActivity.this, "EDIT PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+
+                Event e = eventsOnDate.get(position);
+
+                // get view
+                LayoutInflater li = LayoutInflater.from(MainActivity.this);
+                View promptsView = li.inflate(R.layout.show_event_prompt, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        MainActivity.this);
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+                final TextView summaryEventTV = (TextView) promptsView
+                        .findViewById(R.id.summaryEventTV);
+                final TextView descriptionEventTV = (TextView) promptsView
+                        .findViewById(R.id.descriptionEventTV);
+                final TextView locationEventTV = (TextView) promptsView
+                        .findViewById(R.id.locationEventTV);
+                final TextView dateStartTV = (TextView) promptsView
+                        .findViewById(R.id.dateStartTV);
+                final TextView dateEndTV = (TextView) promptsView
+                        .findViewById(R.id.dateEndTV);
+                final TextView dateUntilTV = (TextView) promptsView
+                        .findViewById(R.id.dateUntilTV);
+                final TextView intervalTV = (TextView) promptsView
+                        .findViewById(R.id.intervalTV);
+                final TextView visibilityTV = (TextView) promptsView
+                        .findViewById(R.id.visibilityTV);
+
+                summaryEventTV.setText(Html.fromHtml("<b>Summary:</b> " + e.getSummary()));
+                descriptionEventTV.setText(Html.fromHtml("<b>Description:</b> " + e.getDescription()));
+                locationEventTV.setText(Html.fromHtml("<b>Location:</b> " + e.getLocation()));
+                dateStartTV.setText(Html.fromHtml("<b>Event Start:</b> " + e.getDateStart().toString()));
+                dateEndTV.setText(Html.fromHtml("<b>Event End:</b> " + e.getDateEnd().toString()));
+                dateUntilTV.setText(Html.fromHtml("<b>Until:</b> " + e.getUntil().toString()));
+
+                String freq;
+                switch(e.getFreq()){
+                    case "DAILY" : freq = "Day"; break;
+                    case "WEEKLY" : freq = "Week"; break;
+                    case "MONTHLY" : freq = "Month"; break;
+                    case "YEARLY" : freq = "Year"; break;
+                    default : freq = "Pick Time Period"; break;
+                }
+
+                if(e.getInterval() != 1)
+                    freq += "s";
+                intervalTV.setText(Html.fromHtml("<b>Interval:</b> Repeat every " + e.getInterval() + " " + freq));
+
+                visibilityTV.setText(Html.fromHtml("<b>Visibility:</b> " + e.getVisibility()));
+
+                        // set dialog message
+                        alertDialogBuilder
+                                .setCancelable(true)
+                                .setNegativeButton("CLOSE",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
+
                 return true;
             }
         });
@@ -412,11 +486,17 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "LOLLANDIA", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Settings", Toast.LENGTH_LONG).show();
             return true;
         }
-        else if (id == R.id.action_example) {
+        else if (id == R.id.action_synchronize) {
             getCalendar();
+            return true;
+        }
+        else if (id == R.id.action_list_view) {
+            Intent intent = new Intent(MainActivity.this, ListEventsActivity.class);
+            startActivity(intent);
+            finish();
             return true;
         }
 
@@ -433,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
     private void getCalendar() {
 
         SendSynchronizeRequest job = new SendSynchronizeRequest();
-        job.execute("nesh");
+        job.execute(getResources().getString(R.string.username));
     }
 
     protected void createEvent(Event e){
@@ -531,14 +611,66 @@ public class MainActivity extends AppCompatActivity {
                 // Getting data from iCal to create a new event
                 String _id = component.getProperty("UID").getValue();
                 String summary = component.getProperty("SUMMARY").getValue();
-                String description = component.getProperty("DESCRIPTION").getValue();
-                String location = component.getProperty("LOCATION").getValue();
-                String visibility = component.getProperty("CLASS").getValue();
-                String freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
-                String weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
 
-                int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
+                // Description
+                String description;
+                try {
+                    description = component.getProperty("DESCRIPTION").getValue();
+                }
+                catch(Exception e)
+                {
+                    description = "";
+                }
 
+                // Location
+                String location;
+                try {
+                    location = component.getProperty("LOCATION").getValue();
+                }
+                catch(Exception e)
+                {
+                    location = "";
+                }
+
+                // Visibility
+                String visibility;
+                try {
+                    visibility = component.getProperty("CLASS").getValue();
+                }
+                catch(Exception e)
+                {
+                    visibility = "";
+                }
+
+                // Frequency
+                String freq;
+                try {
+                    freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
+                }
+                catch(Exception e)
+                {
+                    freq = "";
+                }
+
+                // Week Start
+                String weekStart;
+                try {
+                    weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
+                }
+                catch(Exception e)
+                {
+                    weekStart = "0";
+                }
+
+                // Interval
+                int interval;
+                try {
+                    interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
+                }
+                catch(Exception e)
+                {
+                    interval = 0;
+                }
 
                 SimpleDateFormat sdf =
                         new SimpleDateFormat("yyyyMMdd'T'HHmmss");
@@ -632,6 +764,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Event> getEvents(Date d){
         ArrayList<Event> events = new ArrayList<>();
 
+        if(d == null)
+            return events;
+        
         String refDate = new SimpleDateFormat("dd/MM/yyyy").format(d);
 
         for(Event e : eventsList){
