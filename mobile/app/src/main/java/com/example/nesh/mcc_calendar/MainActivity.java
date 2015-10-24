@@ -147,13 +147,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                Toast.makeText(getBaseContext(), "SHORT: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
             }
         });
 
         eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
-                Toast.makeText(getBaseContext(), "LONG: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "EDIT PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
                 return true;
             }
         });

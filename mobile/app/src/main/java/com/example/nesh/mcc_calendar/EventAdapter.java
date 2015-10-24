@@ -1,6 +1,8 @@
 package com.example.nesh.mcc_calendar;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -38,7 +41,8 @@ public class EventAdapter extends ArrayAdapter<Event> {
         }
         // Lookup view for data population
         TextView eventTv = (TextView) convertView.findViewById(R.id.eventTv);
-        ImageButton eventBtn = (ImageButton) convertView.findViewById(R.id.eventBtn);
+        ImageButton deleteEventBtn = (ImageButton) convertView.findViewById(R.id.deleteEventBtn);
+        ImageButton showEventBtn = (ImageButton) convertView.findViewById(R.id.showEventBtn);
 
         // Setup Date Formatter
         DateFormat format = new SimpleDateFormat("HH:mm:ss");
@@ -46,13 +50,40 @@ public class EventAdapter extends ArrayAdapter<Event> {
         // Populate the data into the template view using the data object
         eventTv.setText(e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" +  format.format(e.getDateStart()));
 
-        eventBtn.setOnClickListener(new View.OnClickListener() {
+        deleteEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if(parentContext instanceof MainActivity){
-                    ((MainActivity)parentContext).deleteEvent(e.get_id());
-                }
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                if (parentContext instanceof MainActivity) {
+                                    ((MainActivity) parentContext).deleteEvent(e.get_id());
+                                }
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+
+            }
+        });
+
+        showEventBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Toast.makeText(getContext(), e.toString(), Toast.LENGTH_LONG).show();
 
             }
         });
