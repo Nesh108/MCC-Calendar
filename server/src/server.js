@@ -176,7 +176,7 @@ router.route('/events/:event_id')
         evt.periodFreq = req.body.periodFreq;
         evt.periodId = req.body.periodId;
         evt.status = req.body.status;
-        evt.visibile = req.body.visibile;
+        evt.scope = req.body.visibility;
 
         evt.save(function(err) {
           if(err)
@@ -236,7 +236,7 @@ router.route('/events/synchronize/all')
 
 //  .get(authController.authorized, function(req, res){
   .get(function(req, res){
-	
+
     var ics_file = "BEGIN:VCALENDAR\r\nMETHOD:PUBLISH\r\nPRODID:-//nesh//NONSGML v1.0//EN\r\nVERSION:2.0\r\n";
 
     // First simple version
