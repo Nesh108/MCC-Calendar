@@ -44,7 +44,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+
+import me.everything.providers.android.calendar.CalendarProvider;
 
 /**
  * Created by Alberto Vaccari on 23-Oct-15.
@@ -71,6 +74,19 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+
+
+        // CALENDAR TEST
+        CalendarProvider calendarProvider = new CalendarProvider(this);
+        List<me.everything.providers.android.calendar.Calendar> calendars = calendarProvider.getCalendars().getList();
+
+        for(me.everything.providers.android.calendar.Calendar c : calendars){
+            Log.d("CALENDAR", c.displayName);
+            for(me.everything.providers.android.calendar.Event e : calendarProvider.getEvents(c.id).getList())
+                Log.d("EVENTS", e.title + " - " + e.description);
+        }
+
+        /////
 
         // Setup Events
         setupEvents();
