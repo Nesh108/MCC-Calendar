@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             caldroidFragment.restoreStatesFromKey(savedInstanceState,
                     "CALDROID_SAVED_STATE");
         }
-        // If activity is created from fresh
+        // else activity is created from fresh
         else {
 
             Bundle args = new Bundle();
@@ -134,12 +134,6 @@ public class MainActivity extends AppCompatActivity {
         caldroidFragment.setCaldroidListener(listener);
 
 
-        // TODO: REMOVE THIS
-        // Testing Stuff
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-
         eventsListView = (ListView) findViewById(R.id.eventsListView);
 
         eventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -147,25 +141,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                Toast.makeText(getBaseContext(), "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                Log.d("LIST", "Clicked SHORT");
+                Toast.makeText(MainActivity.this, "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
             }
         });
 
         eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
-                Toast.makeText(getBaseContext(), "EDIT PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                Log.d("LIST", "Clicked LONG");
+                Toast.makeText(MainActivity.this, "EDIT PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
                 return true;
             }
         });
 
-        final Button customizeButton = (Button) findViewById(R.id.customize_button);
+
+
+        // TODO: REMOVE THIS
+        // Testing Stuff
+        //-------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------
+
+   /*     final Button customizeButton = (Button) findViewById(R.id.customize_button);
 
         // Customize the calendar
         customizeButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                /*if (undo) {
+                *//*if (undo) {
                     customizeButton.setText("Customize");
                     //textView.setText("");
 
@@ -239,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                     text += "Disabled Date: " + formatter.format(date) + "\n";
                 }
 
-               // textView.setText(text);*/
+               // textView.setText(text);*//*
             }
         });
 
@@ -275,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                 dialogCaldroidFragment.show(getSupportFragmentManager(),
                         dialogTag);
             }
-        });
+        });*/
 
         //-------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------
@@ -283,6 +287,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // TODO Auto-generated method stub
+        super.onSaveInstanceState(outState);
+
+        if (caldroidFragment != null) {
+            caldroidFragment.saveStatesToKey(outState, "CALDROID_SAVED_STATE");
+        }
+
+        if (dialogCaldroidFragment != null) {
+            dialogCaldroidFragment.saveStatesToKey(outState,
+                    "DIALOG_CALDROID_SAVED_STATE");
+        }
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
