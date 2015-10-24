@@ -7,12 +7,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.roomorama.caldroid.CaldroidFragment;
@@ -34,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -41,20 +45,18 @@ import java.util.TimeZone;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private boolean undo = false;
-
     final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
     final CaldroidFragment caldroidFragment = new CaldroidFragment();
     private CaldroidFragment dialogCaldroidFragment;
 
     private ArrayList<Event> eventsList = new ArrayList<>();
+    ArrayList<Event> eventsOnDate;
 
     private DBHandler dbHandler = new DBHandler(this);
 
+    private ListView eventsListView;
 
-    // Testing
-    // TODO: Replace with ListView
-    private TextView textView;
+    private Date selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,18 +96,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSelectDate(Date date, View view) {
-                String eventsText = "";
-
-                // Setup Date Formatter
-                DateFormat format = new SimpleDateFormat("HH:mm:ss");
-                format.setTimeZone(TimeZone.getTimeZone("GMT+2"));
-
-                for(Event e : getEvents(date)){
-                    eventsText += " - " + e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" +  format.format(e.getDateStart()) +"\n";
-                }
-
-                textView.setText(eventsText);
-
+                selectedDate = date;
+                showEventList();
             }
 
             @Override
@@ -117,9 +109,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLongClickDate(Date date, View view) {
-                Toast.makeText(getApplicationContext(),
-                        "Long click " + formatter.format(date),
-                        Toast.LENGTH_SHORT).show();
+
+                selectedDate = date;
+                DateFormat format = new SimpleDateFormat("EE");
+                Event e = new Event("", "Event_From_Phone", "This is an event created from the app", "PenguinLand", "PUBLIC", "WEEKLY", format.format(date).substring(0,2).toUpperCase(), date, date, date, 1);
+
+                Log.d("Event_TEST", e.toString());
+                createEvent(e);
+
             }
 
             @Override
@@ -143,7 +140,24 @@ public class MainActivity extends AppCompatActivity {
         //-------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------
 
-        textView = (TextView) findViewById(R.id.textview);
+        eventsListView = (ListView) findViewById(R.id.eventsListView);
+
+        eventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+                Toast.makeText(getBaseContext(), "SHORT: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+            }
+        });
+
+        eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
+                Toast.makeText(getBaseContext(), "LONG: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
+
         final Button customizeButton = (Button) findViewById(R.id.customize_button);
 
         // Customize the calendar
@@ -151,9 +165,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if (undo) {
+                /*if (undo) {
                     customizeButton.setText("Customize");
-                    textView.setText("");
+                    //textView.setText("");
 
                     // Reset calendar
                     caldroidFragment.clearDisableDates();
@@ -225,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                     text += "Disabled Date: " + formatter.format(date) + "\n";
                 }
 
-                textView.setText(text);
+               // textView.setText(text);*/
             }
         });
 
@@ -305,25 +319,78 @@ public class MainActivity extends AppCompatActivity {
 
     private void getCalendar() {
 
-        SendRESTRequest job = new SendRESTRequest();
+        SendSynchronizeRequest job = new SendSynchronizeRequest();
         job.execute("nesh");
     }
 
-    private class SendRESTRequest extends AsyncTask<String, Void, String> {
+    protected void createEvent(Event e){
+
+        CreateEventRequest job = new CreateEventRequest();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+
+        job.execute(new String[]{e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart()});
+
+    }
+
+    private class SendSynchronizeRequest extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String[] params) {
-            RestClient client = new RestClient(getResources().getString(R.string.rest_base_uri) + "?user=" + params[0]);  //Write your url here
-            // client.addParam("Name", "Bhavit");
+            RestClient client = new RestClient(getResources().getString(R.string.rest_synch_uri) + "?user=" + params[0]);
 
-            client.addHeader("content-type", "application/json"); // Here I am specifying that the key-value pairs are sent in the JSON format
+            client.addHeader("content-type", "application/json");
 
             return client.executeGet();
         }
 
         @Override
         protected void onPostExecute(String message) {
-            processEvents(message);
+            try {
+                processEvents(message);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class CreateEventRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String[] params) {
+            RestClient client = new RestClient(getResources().getString(R.string.rest_events_uri));
+            client.addParam("name", params[0]);
+            client.addParam("description", params[1]);
+            client.addParam("dateStart", params[2]);
+            client.addParam("dateEnd", params[3]);
+            client.addParam("location", params[4]);
+            client.addParam("recurFreq", params[5]);
+            client.addParam("recurInterval", params[6]);
+            client.addParam("recurUntil", params[7]);
+            client.addParam("recurWeekStart", params[8]);
+
+            for(String s: params)
+                Log.d("PARAMS", s);
+
+            // Specifying that the key-value pairs are sent in the JSON format
+             client.addHeader("Content-type", "application/x-www-form-urlencoded");
+
+            // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
+            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+            client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
+            Log.d("AUTH", base64EncodedCredentials);
+
+
+            return client.executePost();
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+
+            Log.d("EVENT_CREATE", message);
+            getCalendar();
         }
     }
 
@@ -359,9 +426,17 @@ public class MainActivity extends AppCompatActivity {
 
                 int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
 
-                net.fortuna.ical4j.model.Date dateStart = new net.fortuna.ical4j.model.Date(component.getProperty("DTSTART").getValue());
-                net.fortuna.ical4j.model.Date dateEnd = new net.fortuna.ical4j.model.Date(component.getProperty("DTEND").getValue());
-                net.fortuna.ical4j.model.Date until = new net.fortuna.ical4j.model.Date(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1]);
+
+                SimpleDateFormat sdf =
+                        new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+                Date dateStart = sdf.parse(component.getProperty("DTSTART").getValue().replaceAll("Z$", "+0000"));
+                Date dateEnd = sdf.parse(component.getProperty("DTEND").getValue().replaceAll("Z$", "+0000"));
+                Date until = sdf.parse(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1].replaceAll("Z$", "+0000"));
+
+                Log.d("Date", dateStart.toString());
+                Log.d("Date", dateEnd.toString());
+                Log.d("Date", until.toString());
 
                 // Create a new event
                 Event e = new Event(_id, summary, description, location, visibility, freq, weekStart, dateStart, dateEnd, until, interval);
@@ -381,9 +456,12 @@ public class MainActivity extends AppCompatActivity {
 
             // Show fetched events in the calendar
             showEvents();
+            showEventList();
 
 
-        } catch (ParserException | ParseException | IOException e) {
+        } catch (ParserException | IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
     }
@@ -431,6 +509,12 @@ public class MainActivity extends AppCompatActivity {
         return dates;
     }
 
+    private void showEventList(){
+        eventsOnDate = getEvents(selectedDate);
+        EventAdapter eventAdapter = new EventAdapter(MainActivity.this, eventsOnDate);
+        eventsListView.setAdapter(eventAdapter);
+    }
+
     // Finds all the events of a specific date
     private ArrayList<Event> getEvents(Date d){
         ArrayList<Event> events = new ArrayList<>();
@@ -441,12 +525,67 @@ public class MainActivity extends AppCompatActivity {
             for(Date d1 : getDatesRange(e))
             {
                 String date = new SimpleDateFormat("dd/MM/yyyy").format(d1);
-                if(refDate.equals(date))
+                if(refDate.equals(date) && !events.contains(e))
                     events.add(e);
 
             }
         }
 
         return events;
+    }
+
+    protected void deleteEvent(String id) {
+
+        DeleteEventRequest job = new DeleteEventRequest();
+        job.execute(id);
+    }
+
+    private class DeleteEventRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String[] params) {
+            RestClient client = new RestClient(getResources().getString(R.string.rest_events_uri) + params[0]);
+
+            // Specifying that the key-value pairs are sent in the JSON format
+            client.addHeader("Content-type", "application/x-www-form-urlencoded");
+
+            // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
+            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+            client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
+            Log.d("AUTH", base64EncodedCredentials);
+
+            return client.executeDelete();
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+
+            Log.d("EVENT_DELETE", message);
+
+            if(message.contains("successfully deleted"))
+            {
+                String id = message.split(" ")[1];
+                Log.d("EVENT_DELETE", "ID: " + id);
+                dbHandler.deleteEvent(id);
+
+                // If the event is in the event list
+                if(eventsList.indexOf(new Event(id)) != -1) {
+                    // Make copy of the event to be removed and remove it
+                    Event oldEvent = eventsList.remove(eventsList.indexOf(new Event(id)));
+
+                    // Clear all the related dates
+                    for(Date d : getDatesRange(oldEvent))
+                        caldroidFragment.clearBackgroundResourceForDate(d);
+
+                    // Refresh the calendar
+                    showEvents();
+                    showEventList();
+
+                }
+
+            }
+
+        }
     }
 }

@@ -31,8 +31,8 @@
             android:text="Show Dialog" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textview"
+    <ListView
+        android:id="@+id/eventsListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

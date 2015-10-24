@@ -1,8 +1,8 @@
 package com.example.nesh.mcc_calendar;
 
-import net.fortuna.ical4j.model.Date;
 
 import java.text.ParseException;
+import java.util.Date;
 
 /**
  * Created by Alberto Vaccari on 23-Oct-15.
@@ -50,6 +50,12 @@ public class Event {
         this.until = until;
         this.interval = interval;
         this.visibility = visibility;
+    }
+
+    // Used for dirty search
+    public Event(String _id)
+    {
+        this._id = _id;
     }
 
     @Override

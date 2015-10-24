@@ -57,6 +57,17 @@ public class DBHandler {
 
     }
 
+    public void deleteEvent(Event e) {
+        String id = e.get_id();
+        database.delete(SQLiteEventHelper.TABLE_EVENTS, SQLiteEventHelper.COLUMN_ID
+                + " = '" + id + "'", null);
+    }
+
+    public void deleteEvent(String id) {
+        database.delete(SQLiteEventHelper.TABLE_EVENTS, SQLiteEventHelper.COLUMN_ID
+                + " = '" + id + "'", null);
+    }
+
     public ArrayList<Event> getAllEvents() throws ParseException {
         ArrayList<Event> events = new ArrayList<>();
 
