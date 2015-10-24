@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                         MainActivity.this);
 
-                // set prompts.xml to alertdialog builder
+                // set xml to alertdialog builder
                 alertDialogBuilder.setView(promptsView);
 
                 final EditText summaryEventEdit = (EditText) promptsView
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                         .setCancelable(false)
                         .setPositiveButton("Create",
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
+                                    public void onClick(DialogInterface dialog, int id) {
 
                                         String summary = summaryEventEdit.getText().toString();
                                         String description = descriptionEventEdit.getText().toString();
@@ -167,31 +167,39 @@ public class MainActivity extends AppCompatActivity {
                                         String freq = freqSpinner.getSelectedItem().toString();
                                         String visibility = "PUBLIC";
 
-                                        if(visibilityToggle.isSelected())
+                                        if (visibilityToggle.isSelected())
                                             visibility = "PRIVATE";
 
                                         try {
                                             Integer.parseInt(interval);
-                                        }
-                                        catch(Exception e)
-                                        {
+                                        } catch (Exception e) {
                                             Toast.makeText(MainActivity.this, "Interval must be a number.", Toast.LENGTH_SHORT).show();
                                         }
 
-                                        if(!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))){
+                                        if (!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))) {
 
                                             DateFormat format = new SimpleDateFormat("EE");
                                             try {
 
-                                                switch(freq){
-                                                    case "Day" : freq = "DAILY"; break;
-                                                    case "Week" : freq = "WEEKLY"; break;
-                                                    case "Month" : freq = "MONTHLY"; break;
-                                                    case "Year" : freq = "YEARLY"; break;
-                                                    default : freq = "DAILY"; break;
+                                                switch (freq) {
+                                                    case "Day":
+                                                        freq = "DAILY";
+                                                        break;
+                                                    case "Week":
+                                                        freq = "WEEKLY";
+                                                        break;
+                                                    case "Month":
+                                                        freq = "MONTHLY";
+                                                        break;
+                                                    case "Year":
+                                                        freq = "YEARLY";
+                                                        break;
+                                                    default:
+                                                        freq = "DAILY";
+                                                        break;
                                                 }
 
-                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
+                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0, 2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
                                                 Log.d("Event_CREATE", e.toString());
                                                 createEvent(e);
 
@@ -199,9 +207,8 @@ public class MainActivity extends AppCompatActivity {
                                                 e1.printStackTrace();
                                             }
 
-                                        }
-                                        else
-                                        // TODO: Better feedback
+                                        } else
+                                            // TODO: Better feedback
                                             Toast.makeText(MainActivity.this, "Error during the form check.", Toast.LENGTH_SHORT).show();
 
 
@@ -209,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                                 })
                         .setNegativeButton("Discard",
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
+                                    public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                     }
                                 });
@@ -244,11 +251,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                Toast.makeText(MainActivity.this, "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(),Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(), Toast.LENGTH_LONG).show();
             }
         });
 
-        eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
+        eventsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
 
                 Event e = eventsOnDate.get(position);
@@ -288,29 +295,39 @@ public class MainActivity extends AppCompatActivity {
                 dateUntilTV.setText(Html.fromHtml("<b>Until:</b> " + e.getUntil().toString()));
 
                 String freq;
-                switch(e.getFreq()){
-                    case "DAILY" : freq = "Day"; break;
-                    case "WEEKLY" : freq = "Week"; break;
-                    case "MONTHLY" : freq = "Month"; break;
-                    case "YEARLY" : freq = "Year"; break;
-                    default : freq = "Pick Time Period"; break;
+                switch (e.getFreq()) {
+                    case "DAILY":
+                        freq = "Day";
+                        break;
+                    case "WEEKLY":
+                        freq = "Week";
+                        break;
+                    case "MONTHLY":
+                        freq = "Month";
+                        break;
+                    case "YEARLY":
+                        freq = "Year";
+                        break;
+                    default:
+                        freq = "Pick Time Period";
+                        break;
                 }
 
-                if(e.getInterval() != 1)
+                if (e.getInterval() != 1)
                     freq += "s";
                 intervalTV.setText(Html.fromHtml("<b>Interval:</b> Repeat every " + e.getInterval() + " " + freq));
 
                 visibilityTV.setText(Html.fromHtml("<b>Visibility:</b> " + e.getVisibility()));
 
-                        // set dialog message
-                        alertDialogBuilder
-                                .setCancelable(true)
-                                .setNegativeButton("CLOSE",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                dialog.cancel();
-                                            }
-                                        });
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(true)
+                        .setNegativeButton("CLOSE",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
 
                 // create alert dialog
                 AlertDialog alertDialog = alertDialogBuilder.create();
@@ -321,7 +338,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
 
 
         // TODO: REMOVE THIS
@@ -488,15 +504,16 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Toast.makeText(this, "Settings", Toast.LENGTH_LONG).show();
             return true;
-        }
-        else if (id == R.id.action_synchronize) {
+        } else if (id == R.id.action_synchronize) {
             getCalendar();
             return true;
-        }
-        else if (id == R.id.action_list_view) {
+        } else if (id == R.id.action_list_view) {
             Intent intent = new Intent(MainActivity.this, ListEventsActivity.class);
             startActivity(intent);
             finish();
+            return true;
+        } else if (id == R.id.action_about) {
+            showAboutDialog();
             return true;
         }
 
@@ -516,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
         job.execute(getResources().getString(R.string.username));
     }
 
-    protected void createEvent(Event e){
+    protected void createEvent(Event e) {
 
         CreateEventRequest job = new CreateEventRequest();
 
@@ -541,8 +558,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String message) {
             try {
                 processEvents(message);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -563,11 +579,11 @@ public class MainActivity extends AppCompatActivity {
             client.addParam("recurUntil", params[7]);
             client.addParam("recurWeekStart", params[8]);
 
-            for(String s: params)
+            for (String s : params)
                 Log.d("PARAMS", s);
 
             // Specifying that the key-value pairs are sent in the JSON format
-             client.addHeader("Content-type", "application/x-www-form-urlencoded");
+            client.addHeader("Content-type", "application/x-www-form-urlencoded");
 
             // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
             String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
@@ -588,7 +604,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void processEvents(String events){
+    private void processEvents(String events) {
         try {
                 /*JSONObject response = new JSONObject(message);
                 Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
@@ -616,9 +632,7 @@ public class MainActivity extends AppCompatActivity {
                 String description;
                 try {
                     description = component.getProperty("DESCRIPTION").getValue();
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     description = "";
                 }
 
@@ -626,9 +640,7 @@ public class MainActivity extends AppCompatActivity {
                 String location;
                 try {
                     location = component.getProperty("LOCATION").getValue();
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     location = "";
                 }
 
@@ -636,9 +648,7 @@ public class MainActivity extends AppCompatActivity {
                 String visibility;
                 try {
                     visibility = component.getProperty("CLASS").getValue();
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     visibility = "";
                 }
 
@@ -646,9 +656,7 @@ public class MainActivity extends AppCompatActivity {
                 String freq;
                 try {
                     freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     freq = "";
                 }
 
@@ -656,9 +664,7 @@ public class MainActivity extends AppCompatActivity {
                 String weekStart;
                 try {
                     weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     weekStart = "0";
                 }
 
@@ -666,9 +672,7 @@ public class MainActivity extends AppCompatActivity {
                 int interval;
                 try {
                     interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
-                }
-                catch(Exception e)
-                {
+                } catch (Exception e) {
                     interval = 0;
                 }
 
@@ -711,7 +715,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupEvents(){
+    private void setupEvents() {
         try {
             dbHandler.open();
         } catch (SQLException e) {
@@ -728,12 +732,12 @@ public class MainActivity extends AppCompatActivity {
         showEvents();
     }
 
-    private void showEvents(){
+    private void showEvents() {
 
         // Add event to calendar
-        for(Event e : eventsList) {
+        for (Event e : eventsList) {
 
-            for(Date d : getDatesRange(e))
+            for (Date d : getDatesRange(e))
                 caldroidFragment.setBackgroundResourceForDate(R.color.red, d);
 
             Log.d("iCal", "Event " + e.toString() + " added to calendar.");
@@ -743,7 +747,7 @@ public class MainActivity extends AppCompatActivity {
         caldroidFragment.refreshView();
     }
 
-    private ArrayList<Date> getDatesRange(Event e){
+    private ArrayList<Date> getDatesRange(Event e) {
         ArrayList<Date> dates = new ArrayList<>();
 
         // TODO: Do a better job than this
@@ -754,26 +758,25 @@ public class MainActivity extends AppCompatActivity {
         return dates;
     }
 
-    private void showEventList(){
+    private void showEventList() {
         eventsOnDate = getEvents(selectedDate);
         EventAdapter eventAdapter = new EventAdapter(MainActivity.this, eventsOnDate);
         eventsListView.setAdapter(eventAdapter);
     }
 
     // Finds all the events of a specific date
-    private ArrayList<Event> getEvents(Date d){
+    private ArrayList<Event> getEvents(Date d) {
         ArrayList<Event> events = new ArrayList<>();
 
-        if(d == null)
+        if (d == null)
             return events;
 
         String refDate = new SimpleDateFormat("dd/MM/yyyy").format(d);
 
-        for(Event e : eventsList){
-            for(Date d1 : getDatesRange(e))
-            {
+        for (Event e : eventsList) {
+            for (Date d1 : getDatesRange(e)) {
                 String date = new SimpleDateFormat("dd/MM/yyyy").format(d1);
-                if(refDate.equals(date) && !events.contains(e))
+                if (refDate.equals(date) && !events.contains(e))
                     events.add(e);
 
             }
@@ -811,19 +814,18 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d("EVENT_DELETE", message);
 
-            if(message.contains("successfully deleted"))
-            {
+            if (message.contains("successfully deleted")) {
                 String id = message.split(" ")[1];
                 Log.d("EVENT_DELETE", "ID: " + id);
                 dbHandler.deleteEvent(id);
 
                 // If the event is in the event list
-                if(eventsList.indexOf(new Event(id)) != -1) {
+                if (eventsList.indexOf(new Event(id)) != -1) {
                     // Make copy of the event to be removed and remove it
                     Event oldEvent = eventsList.remove(eventsList.indexOf(new Event(id)));
 
                     // Clear all the related dates
-                    for(Date d : getDatesRange(oldEvent))
+                    for (Date d : getDatesRange(oldEvent))
                         caldroidFragment.clearBackgroundResourceForDate(d);
 
                     // Refresh the calendar
@@ -837,7 +839,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void updateEvent(Event e){
+    protected void updateEvent(Event e) {
 
         UpdateEventRequest job = new UpdateEventRequest();
 
@@ -862,7 +864,7 @@ public class MainActivity extends AppCompatActivity {
             client.addParam("recurUntil", params[8]);
             client.addParam("recurWeekStart", params[9]);
 
-            for(String s: params)
+            for (String s : params)
                 Log.d("PARAMS", s);
 
             // Specifying that the key-value pairs are sent in the JSON format
@@ -881,8 +883,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String message) {
 
             Log.d("EVENT_UPDATE", message);
-            if(message.contains("successfully"))
-            {
+            if (message.contains("successfully")) {
                 String id = message.split(" ")[1];
                 Log.d("EVENT_UPDATE", "ID: " + id);
 
@@ -898,5 +899,33 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    private void showAboutDialog() {
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+        View promptsView = li.inflate(R.layout.about_prompt, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                MainActivity.this);
+
+        // set xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(true)
+                .setNegativeButton("Close",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 }

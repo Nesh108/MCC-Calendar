@@ -34,7 +34,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
         parentContext = context;
 
         String[] path = context.getClass().getName().split("\\.");
-        parentClassName = path[path.length-1];
+        parentClassName = path[path.length - 1];
 
     }
 
@@ -56,7 +56,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
         DateFormat format = new SimpleDateFormat("HH:mm:ss");
 
         // Populate the data into the template view using the data object
-        eventTv.setText(e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" +  format.format(e.getDateStart()));
+        eventTv.setText(e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" + format.format(e.getDateStart()));
 
         deleteEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,12 +65,12 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        switch (which){
+                        switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                   if(parentClassName.equals("MainActivity"))
-                                       ((MainActivity) parentContext).deleteEvent(e.get_id());
-                                   else if(parentClassName.equals("ListEventsActivity"))
-                                       ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
+                                if (parentClassName.equals("MainActivity"))
+                                    ((MainActivity) parentContext).deleteEvent(e.get_id());
+                                else if (parentClassName.equals("ListEventsActivity"))
+                                    ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
 
                                 break;
 
@@ -134,24 +134,33 @@ public class EventAdapter extends ArrayAdapter<Event> {
 
                 // Select correct value from freq spinner
                 String freq;
-                switch(e.getFreq()){
-                        case "DAILY" : freq = "Day"; break;
-                        case "WEEKLY" : freq = "Week"; break;
-                        case "MONTHLY" : freq = "Month"; break;
-                        case "YEARLY" : freq = "Year"; break;
-                        default : freq = "Pick Time Period"; break;
+                switch (e.getFreq()) {
+                    case "DAILY":
+                        freq = "Day";
+                        break;
+                    case "WEEKLY":
+                        freq = "Week";
+                        break;
+                    case "MONTHLY":
+                        freq = "Month";
+                        break;
+                    case "YEARLY":
+                        freq = "Year";
+                        break;
+                    default:
+                        freq = "Pick Time Period";
+                        break;
                 }
 
                 int pos = 0;
-                for(String s: parentContext.getResources().getStringArray(R.array.freq_list))
-                {
-                    if(s.equals(freq))
+                for (String s : parentContext.getResources().getStringArray(R.array.freq_list)) {
+                    if (s.equals(freq))
                         break;
                     pos++;
                 }
                 freqSpinner.setSelection(pos);
 
-                if(e.getVisibility().equals("PRIVATE"))
+                if (e.getVisibility().equals("PRIVATE"))
                     visibilityToggle.setActivated(true);
 
                 // set dialog message
@@ -159,7 +168,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                         .setCancelable(true)
                         .setPositiveButton("UPDATE",
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
+                                    public void onClick(DialogInterface dialog, int id) {
 
                                         String summary = summaryEventEdit.getText().toString();
                                         String description = descriptionEventEdit.getText().toString();
@@ -171,45 +180,52 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                         String freq = freqSpinner.getSelectedItem().toString();
                                         String visibility = "PUBLIC";
 
-                                        if(visibilityToggle.isSelected())
+                                        if (visibilityToggle.isSelected())
                                             visibility = "PRIVATE";
 
                                         try {
                                             Integer.parseInt(interval);
-                                        }
-                                        catch(Exception e)
-                                        {
+                                        } catch (Exception e) {
                                             Toast.makeText(parentContext, "Interval must be a number.", Toast.LENGTH_SHORT).show();
                                         }
 
-                                        if(!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))){
+                                        if (!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))) {
 
                                             DateFormat format = new SimpleDateFormat("EE");
                                             try {
 
-                                                switch(freq){
-                                                    case "Day" : freq = "DAILY"; break;
-                                                    case "Week" : freq = "WEEKLY"; break;
-                                                    case "Month" : freq = "MONTHLY"; break;
-                                                    case "Year" : freq = "YEARLY"; break;
-                                                    default : freq = "DAILY"; break;
+                                                switch (freq) {
+                                                    case "Day":
+                                                        freq = "DAILY";
+                                                        break;
+                                                    case "Week":
+                                                        freq = "WEEKLY";
+                                                        break;
+                                                    case "Month":
+                                                        freq = "MONTHLY";
+                                                        break;
+                                                    case "Year":
+                                                        freq = "YEARLY";
+                                                        break;
+                                                    default:
+                                                        freq = "DAILY";
+                                                        break;
                                                 }
 
-                                                Event ev = new Event(e.get_id(), summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
+                                                Event ev = new Event(e.get_id(), summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0, 2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
                                                 Log.d("Event_EDIT", ev.toString());
 
                                                 Toast.makeText(parentContext, "Everything went fine. I am supposed to SEND UPDATE REQUEST.", Toast.LENGTH_SHORT).show();
-                                                if(parentClassName.equals("MainActivity"))
+                                                if (parentClassName.equals("MainActivity"))
                                                     ((MainActivity) parentContext).updateEvent(ev);
-                                                else if(parentClassName.equals("ListEventsActivity"))
+                                                else if (parentClassName.equals("ListEventsActivity"))
                                                     ((ListEventsActivity) parentContext).updateEvent(ev);
 
                                             } catch (ParseException e1) {
                                                 e1.printStackTrace();
                                             }
 
-                                        }
-                                        else
+                                        } else
                                             // TODO: Better feedback
                                             Toast.makeText(parentContext, "Error during the form check.", Toast.LENGTH_SHORT).show();
 
@@ -218,7 +234,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                 })
                         .setNegativeButton("CANCEL",
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
+                                    public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                     }
                                 });

@@ -3,20 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/calendar1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
-    </LinearLayout>
+        android:orientation="vertical"></LinearLayout>
 
     <ListView
         android:id="@+id/eventsListView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:background="#000000"
-        android:overScrollFooter="@null"
         android:footerDividersEnabled="false"
-        />
+        android:overScrollFooter="@null" />
 
 </LinearLayout>

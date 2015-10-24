@@ -9,8 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:background="#000000"
-        android:overScrollFooter="@null"
         android:footerDividersEnabled="false"
-        />
+        android:overScrollFooter="@null" />
 
 </LinearLayout>

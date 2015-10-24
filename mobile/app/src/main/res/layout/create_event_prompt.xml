@@ -15,68 +15,67 @@
 
     <EditText
         android:id="@+id/summaryEventEdit"
-        android:hint="Summary"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:hint="Summary">
+
         <requestFocus />
     </EditText>
 
     <EditText
         android:id="@+id/descriptionEventEdit"
-        android:hint="Description (Optional)"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="Description (Optional)" />
 
     <EditText
         android:id="@+id/locationEventEdit"
-        android:hint="Location (Optional)"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="Location (Optional)" />
 
 
     <EditText
+        android:id="@+id/dateStartEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Start Date"
-        android:id="@+id/dateStartEdit" />
+        android:hint="Start Date" />
 
     <EditText
+        android:id="@+id/dateEndEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="End Date"
         android:ems="10"
-        android:id="@+id/dateEndEdit" />
+        android:hint="End Date" />
 
 
     <EditText
+        android:id="@+id/intervalPicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Repeat Every X"
         android:ems="10"
-        android:id="@+id/intervalPicker" />
-
+        android:hint="Repeat Every X" />
 
     <Spinner
+        android:id="@+id/freqSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/freqSpinner"
-        android:entries="@array/freq_list"/>
+        android:entries="@array/freq_list" />
 
     <EditText
+        android:id="@+id/dateUntilEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Until Date"
         android:ems="10"
-        android:id="@+id/dateUntilEdit" />
+        android:hint="Until Date" />
 
     <ToggleButton
+        android:id="@+id/visibilityToggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/visibilityToggle"
         android:textOff="Public"
         android:textOn="Private" />
-
 
 
 </LinearLayout>

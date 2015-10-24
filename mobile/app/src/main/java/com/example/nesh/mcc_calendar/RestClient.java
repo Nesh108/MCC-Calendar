@@ -41,7 +41,7 @@ import org.json.JSONObject;
 public class RestClient {
 
 
-    List <NameValuePair> data = new ArrayList<NameValuePair>();
+    List<NameValuePair> data = new ArrayList<NameValuePair>();
     String url;
     String headerName;
     String headerValue;

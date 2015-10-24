@@ -38,7 +38,7 @@ public class Event {
         this(_id, summary, description, location, visibility, freq, weekStart, new Date(dateStart), new Date(dateEnd), new Date(until), interval);
     }
 
-    public Event(String _id, String summary, String description, String location, String visibility, String freq, String weekStart, Date dateStart, Date dateEnd, Date until, int interval){
+    public Event(String _id, String summary, String description, String location, String visibility, String freq, String weekStart, Date dateStart, Date dateEnd, Date until, int interval) {
         this._id = _id;
         this.dateStart = dateStart;
         this.summary = summary;
@@ -53,8 +53,7 @@ public class Event {
     }
 
     // Used for dirty search
-    public Event(String _id)
-    {
+    public Event(String _id) {
         this._id = _id;
     }
 

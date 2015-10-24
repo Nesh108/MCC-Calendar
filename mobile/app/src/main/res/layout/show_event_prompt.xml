@@ -15,65 +15,63 @@
 
     <TextView
         android:id="@+id/summaryEventTV"
-        android:hint="Summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:hint="Summary"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/descriptionEventTV"
-        android:hint="Description (Optional)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:hint="Description (Optional)"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/locationEventTV"
-        android:hint="Location (Optional)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:hint="Location (Optional)"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 
     <TextView
+        android:id="@+id/dateStartTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Start Date"
-        android:id="@+id/dateStartTV"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="End Date"
-        android:ems="10"
         android:id="@+id/dateEndTV"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-
-    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Repeat Every "
         android:ems="10"
+        android:hint="End Date"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
         android:id="@+id/intervalTV"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Until Date"
         android:ems="10"
-        android:id="@+id/dateUntilTV"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:hint="Repeat Every "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
+        android:id="@+id/dateUntilTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Until Date"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/visibilityTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/visibilityTV"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
-
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 
 </LinearLayout>

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -18,15 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
-
-import com.roomorama.caldroid.CaldroidFragment;
-import com.roomorama.caldroid.CaldroidListener;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -38,13 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -198,6 +188,9 @@ public class ListEventsActivity extends AppCompatActivity {
             Intent intent = new Intent(ListEventsActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
+            return true;
+        } else if (id == R.id.action_about){
+            showAboutDialog();
             return true;
         }
 
@@ -380,7 +373,7 @@ public class ListEventsActivity extends AppCompatActivity {
 
     }
 
-    protected void updateEvent(Event e){
+    protected void updateEvent(Event e) {
 
         UpdateEventRequest job = new UpdateEventRequest();
 
@@ -439,5 +432,33 @@ public class ListEventsActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    private void showAboutDialog(){
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(ListEventsActivity.this);
+        View promptsView = li.inflate(R.layout.about_prompt, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                ListEventsActivity.this);
+
+        // set xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(true)
+                .setNegativeButton("Close",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 }

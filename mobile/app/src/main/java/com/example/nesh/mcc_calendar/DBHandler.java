@@ -18,7 +18,7 @@ public class DBHandler {
     // Database fields
     private SQLiteDatabase database;
     private SQLiteEventHelper dbHelper;
-    private String[] allColumns = { SQLiteEventHelper.COLUMN_ID, SQLiteEventHelper.COLUMN_SUMMARY, SQLiteEventHelper.COLUMN_DESCR,
+    private String[] allColumns = {SQLiteEventHelper.COLUMN_ID, SQLiteEventHelper.COLUMN_SUMMARY, SQLiteEventHelper.COLUMN_DESCR,
             SQLiteEventHelper.COLUMN_LOC, SQLiteEventHelper.COLUMN_VIS, SQLiteEventHelper.COLUMN_FREQ,
             SQLiteEventHelper.COLUMN_WEEKSTART, SQLiteEventHelper.COLUMN_DATESTART, SQLiteEventHelper.COLUMN_DATEEND,
             SQLiteEventHelper.COLUMN_UNTIL, SQLiteEventHelper.COLUMN_INTERVAL};
@@ -89,7 +89,7 @@ public class DBHandler {
 
     // Converts cursor to an Event
     private Event cursorToEvent(Cursor cursor) throws ParseException {
-        Event event = new Event(cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9),cursor.getString(10));
+        Event event = new Event(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8), cursor.getString(9), cursor.getString(10));
         return event;
     }
 }
