@@ -78,7 +78,7 @@ public class ListEventsActivity extends AppCompatActivity {
             }
         });
 
-        eventsListView.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener() {
+        eventsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
 
                 Event e = eventsList.get(position);
@@ -118,15 +118,25 @@ public class ListEventsActivity extends AppCompatActivity {
                 dateUntilTV.setText(Html.fromHtml("<b>Until:</b> " + e.getUntil().toString()));
 
                 String freq;
-                switch(e.getFreq()){
-                    case "DAILY" : freq = "Day"; break;
-                    case "WEEKLY" : freq = "Week"; break;
-                    case "MONTHLY" : freq = "Month"; break;
-                    case "YEARLY" : freq = "Year"; break;
-                    default : freq = "Pick Time Period"; break;
+                switch (e.getFreq()) {
+                    case "DAILY":
+                        freq = "Day";
+                        break;
+                    case "WEEKLY":
+                        freq = "Week";
+                        break;
+                    case "MONTHLY":
+                        freq = "Month";
+                        break;
+                    case "YEARLY":
+                        freq = "Year";
+                        break;
+                    default:
+                        freq = "Pick Time Period";
+                        break;
                 }
 
-                if(e.getInterval() != 1)
+                if (e.getInterval() != 1)
                     freq += "s";
                 intervalTV.setText(Html.fromHtml("<b>Interval:</b> Repeat every " + e.getInterval() + " " + freq));
 
@@ -181,12 +191,10 @@ public class ListEventsActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Toast.makeText(this, "Settings", Toast.LENGTH_LONG).show();
             return true;
-        }
-        else if (id == R.id.action_synchronize) {
+        } else if (id == R.id.action_synchronize) {
             getCalendar();
             return true;
-        }
-        else if (id == R.id.action_calendar_view) {
+        } else if (id == R.id.action_calendar_view) {
             Intent intent = new Intent(ListEventsActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -225,17 +233,15 @@ public class ListEventsActivity extends AppCompatActivity {
         protected void onPostExecute(String message) {
             try {
                 processEvents(message);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
 
-
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void processEvents(String events){
+    private void processEvents(String events) {
         try {
                 /*JSONObject response = new JSONObject(message);
                 Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
@@ -305,7 +311,7 @@ public class ListEventsActivity extends AppCompatActivity {
         }
     }
 
-    private void setupEvents(){
+    private void setupEvents() {
         try {
             dbHandler.open();
         } catch (SQLException e) {
@@ -321,7 +327,7 @@ public class ListEventsActivity extends AppCompatActivity {
 
     }
 
-    private void showEventList(){
+    private void showEventList() {
         EventAdapter eventAdapter = new EventAdapter(ListEventsActivity.this, eventsList);
         eventsListView.setAdapter(eventAdapter);
     }
@@ -356,8 +362,7 @@ public class ListEventsActivity extends AppCompatActivity {
 
             Log.d("EVENT_DELETE", message);
 
-            if(message.contains("successfully deleted"))
-            {
+            if (message.contains("successfully deleted")) {
                 String id = message.split(" ")[1];
                 Log.d("EVENT_DELETE", "ID: " + id);
                 dbHandler.deleteEvent(id);
@@ -371,6 +376,68 @@ public class ListEventsActivity extends AppCompatActivity {
 
             }
 
+        }
+
+    }
+
+    protected void updateEvent(Event e){
+
+        UpdateEventRequest job = new UpdateEventRequest();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+
+        job.execute(new String[]{e.get_id(), e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart()});
+
+    }
+
+    private class UpdateEventRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String[] params) {
+            RestClient client = new RestClient(getResources().getString(R.string.rest_events_uri) + params[0]);
+            client.addParam("name", params[1]);
+            client.addParam("description", params[2]);
+            client.addParam("dateStart", params[3]);
+            client.addParam("dateEnd", params[4]);
+            client.addParam("location", params[5]);
+            client.addParam("recurFreq", params[6]);
+            client.addParam("recurInterval", params[7]);
+            client.addParam("recurUntil", params[8]);
+            client.addParam("recurWeekStart", params[9]);
+
+            for (String s : params)
+                Log.d("PARAMS", s);
+
+            // Specifying that the key-value pairs are sent in the JSON format
+            client.addHeader("Content-type", "application/x-www-form-urlencoded");
+
+            // Basic Authentication, From: http://blog.leocad.io/basic-http-authentication-on-android/
+            String credentials = getResources().getString(R.string.username) + ":" + getResources().getString(R.string.password);
+            String base64EncodedCredentials = Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+            client.addHeader("Authorization", "Basic " + base64EncodedCredentials + " ");
+            Log.d("AUTH", base64EncodedCredentials);
+
+            return client.executePut();
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+
+            Log.d("EVENT_UPDATE", message);
+            if (message.contains("successfully")) {
+                String id = message.split(" ")[1];
+                Log.d("EVENT_UPDATE", "ID: " + id);
+
+                dbHandler.deleteEvent(id);
+
+                // Make copy of the event to be removed and remove it
+                eventsList.remove(eventsList.indexOf(new Event(id)));
+
+                // Refresh the calendar
+                getCalendar();
+                showEventList();
+
+            }
         }
     }
 }

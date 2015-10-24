@@ -28,6 +28,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -73,6 +74,36 @@ public class RestClient {
             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data, HTTP.UTF_8);
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
+            HttpEntity entity1 = response.getEntity();
+            result = EntityUtils.toString(entity1);
+            return result;
+            //Toast.makeText(MainPage.this, result, Toast.LENGTH_LONG).show();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return result;
+
+
+    }
+
+    public String executePut() {  // If you want to use post method to hit server
+
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpPut httpPut = new HttpPut(url);
+        httpPut.setHeader(headerName, headerValue);
+        HttpResponse response = null;
+        String result = null;
+        try {
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data, HTTP.UTF_8);
+            httpPut.setEntity(entity);
+            response = httpClient.execute(httpPut);
             HttpEntity entity1 = response.getEntity();
             result = EntityUtils.toString(entity1);
             return result;

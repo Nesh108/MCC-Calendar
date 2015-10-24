@@ -195,11 +195,14 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                                     default : freq = "DAILY"; break;
                                                 }
 
-                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
-                                                Log.d("Event_EDIT", e.toString());
+                                                Event ev = new Event(e.get_id(), summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
+                                                Log.d("Event_EDIT", ev.toString());
 
                                                 Toast.makeText(parentContext, "Everything went fine. I am supposed to SEND UPDATE REQUEST.", Toast.LENGTH_SHORT).show();
-                                                //createEvent(e);
+                                                if(parentClassName.equals("MainActivity"))
+                                                    ((MainActivity) parentContext).updateEvent(ev);
+                                                else if(parentClassName.equals("ListEventsActivity"))
+                                                    ((ListEventsActivity) parentContext).updateEvent(ev);
 
                                             } catch (ParseException e1) {
                                                 e1.printStackTrace();
