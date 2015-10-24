@@ -438,7 +438,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "Settings", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         } else if (id == R.id.action_synchronize) {
             getCalendar();
@@ -452,7 +453,8 @@ public class MainActivity extends AppCompatActivity {
             showAboutDialog();
             return true;
         } else if (id == R.id.action_import) {
-            Toast.makeText(this, "Import Wizard...", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(MainActivity.this, ImportActivity.class);
+            startActivity(intent);
             return true;
         }
 

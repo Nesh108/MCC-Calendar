@@ -18,6 +18,10 @@
         <item>Year</item>
     </string-array>
 
-    <string name="about_prompt">Calendar for the Mobile Cloud Computing course at Aalto University (Espoo, Finland).\n\nMade by Alberto Vaccari in the end of 2015.</string>
+    <string name="about_prompt">Calendar for the Mobile Cloud Computing course at Aalto University (Espoo, Finland).\n\nCreated by Alberto Vaccari in the end of 2015.</string>
+    <string name="title_activity_import">Import Wizard</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_settings">Settings</string>
 
 </resources>
