@@ -379,7 +379,7 @@ public class ListEventsActivity extends AppCompatActivity {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
 
-        job.execute(new String[]{e.get_id(), e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart()});
+        job.execute(new String[]{e.get_id(), e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart(), e.getVisibility()});
 
     }
 
@@ -397,6 +397,7 @@ public class ListEventsActivity extends AppCompatActivity {
             client.addParam("recurInterval", params[7]);
             client.addParam("recurUntil", params[8]);
             client.addParam("recurWeekStart", params[9]);
+            client.addParam("scope", params[10]);
 
             for (String s : params)
                 Log.d("PARAMS", s);

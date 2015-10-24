@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                                         String freq = freqSpinner.getSelectedItem().toString();
                                         String visibility = "PUBLIC";
 
-                                        if (visibilityToggle.isSelected())
+                                        if (visibilityToggle.isChecked())
                                             visibility = "PRIVATE";
 
                                         try {
@@ -539,7 +539,7 @@ public class MainActivity extends AppCompatActivity {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
 
-        job.execute(new String[]{e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart()});
+        job.execute(new String[]{e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart(), e.getVisibility()});
 
     }
 
@@ -578,6 +578,7 @@ public class MainActivity extends AppCompatActivity {
             client.addParam("recurInterval", params[6]);
             client.addParam("recurUntil", params[7]);
             client.addParam("recurWeekStart", params[8]);
+            client.addParam("scope", params[9]);
 
             for (String s : params)
                 Log.d("PARAMS", s);
@@ -738,7 +739,10 @@ public class MainActivity extends AppCompatActivity {
         for (Event e : eventsList) {
 
             for (Date d : getDatesRange(e))
-                caldroidFragment.setBackgroundResourceForDate(R.color.red, d);
+                if(e.getVisibility().equals("PUBLIC"))
+                    caldroidFragment.setBackgroundResourceForDate(R.color.blue, d);
+                else
+                    caldroidFragment.setBackgroundResourceForDate(R.color.red, d);
 
             Log.d("iCal", "Event " + e.toString() + " added to calendar.");
         }
@@ -845,7 +849,7 @@ public class MainActivity extends AppCompatActivity {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
 
-        job.execute(new String[]{e.get_id(), e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart()});
+        job.execute(new String[]{e.get_id(), e.getSummary(), e.getDescription(), sdf.format(e.getDateStart()), sdf.format(e.getDateEnd()), e.getLocation(), e.getFreq(), "" + e.getInterval(), sdf.format(e.getUntil()), e.getWeekStart(), e.getVisibility()});
 
     }
 
@@ -863,6 +867,7 @@ public class MainActivity extends AppCompatActivity {
             client.addParam("recurInterval", params[7]);
             client.addParam("recurUntil", params[8]);
             client.addParam("recurWeekStart", params[9]);
+            client.addParam("scope", params[10]);
 
             for (String s : params)
                 Log.d("PARAMS", s);

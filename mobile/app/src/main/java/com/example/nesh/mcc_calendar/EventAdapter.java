@@ -3,6 +3,8 @@ package com.example.nesh.mcc_calendar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -162,7 +165,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 freqSpinner.setSelection(pos);
 
                 if (e.getVisibility().equals("PRIVATE"))
-                    visibilityToggle.setActivated(true);
+                    visibilityToggle.setChecked(true);
 
                 // set dialog message
                 alertDialogBuilder
@@ -181,7 +184,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                         String freq = freqSpinner.getSelectedItem().toString();
                                         String visibility = "PUBLIC";
 
-                                        if (visibilityToggle.isSelected())
+                                        if (visibilityToggle.isChecked())
                                             visibility = "PRIVATE";
 
                                         try {
@@ -252,8 +255,39 @@ public class EventAdapter extends ArrayAdapter<Event> {
         exportEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Export
-                Toast.makeText(parentContext, "TODO: Export " + e.getSummary() + " to local calendar", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setType("vnd.android.cursor.item/event");
+
+                intent.putExtra(CalendarContract.Events.TITLE, e.getSummary());
+                intent.putExtra(CalendarContract.Events.DESCRIPTION, e.getDescription());
+                intent.putExtra(CalendarContract.Events.EVENT_LOCATION, e.getLocation());
+
+                if(e.getVisibility().equals("PRIVATE"))
+                    intent.putExtra(CalendarContract.Events.VISIBLE, 0);
+
+                intent.putExtra(CalendarContract.Events.DTSTART, e.getDateStart());
+                intent.putExtra(CalendarContract.Events.DTEND, e.getDateEnd());
+                String freq;
+                switch (e.getFreq()) {
+                    case "Day":
+                        freq = "DAILY";
+                        break;
+                    case "Week":
+                        freq = "WEEKLY";
+                        break;
+                    case "Month":
+                        freq = "MONTHLY";
+                        break;
+                    case "Year":
+                        freq = "YEARLY";
+                        break;
+                    default:
+                        freq = "DAILY";
+                        break;
+                }
+
+                intent.putExtra(CalendarContract.Events.RRULE, "FREQ=" + freq + ";INTERVAL=" + e.getInterval() + ";UNTIL=" + e.getUntil() + ";WKST=" + e.getWeekStart());
+                parentContext.startActivity(intent);
             }
         });
 
