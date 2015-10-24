@@ -20,11 +20,20 @@
         android:layout_weight="1" />
 
     <ImageButton
+        android:id="@+id/exportEventBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/showEventBtn"
+        android:layout_gravity="right"
+        android:src="@drawable/ic_file_upload_black_48dp" />
+
+    <ImageButton
         android:id="@+id/showEventBtn"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/eventTv"
+        android:layout_alignRight="@+id/exportEventBtn"
         android:layout_gravity="right"
         android:src="@drawable/ic_format_align_justify_black_48dp" />
 

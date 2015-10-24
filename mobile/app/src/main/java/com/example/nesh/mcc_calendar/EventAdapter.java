@@ -51,6 +51,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
         TextView eventTv = (TextView) convertView.findViewById(R.id.eventTv);
         ImageButton deleteEventBtn = (ImageButton) convertView.findViewById(R.id.deleteEventBtn);
         ImageButton showEventBtn = (ImageButton) convertView.findViewById(R.id.showEventBtn);
+        ImageButton exportEventBtn = (ImageButton) convertView.findViewById(R.id.exportEventBtn);
 
         // Setup Date Formatter
         DateFormat format = new SimpleDateFormat("HH:mm:ss");
@@ -245,6 +246,14 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 // show it
                 alertDialog.show();
 
+            }
+        });
+
+        exportEventBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: Export
+                Toast.makeText(parentContext, "TODO: Export " + e.getSummary() + " to local calendar", Toast.LENGTH_SHORT).show();
             }
         });
 
