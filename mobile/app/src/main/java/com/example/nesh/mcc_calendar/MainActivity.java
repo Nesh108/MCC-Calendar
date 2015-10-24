@@ -1,6 +1,8 @@
 package com.example.nesh.mcc_calendar;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentTransaction;
@@ -9,14 +11,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
@@ -111,11 +118,98 @@ public class MainActivity extends AppCompatActivity {
             public void onLongClickDate(Date date, View view) {
 
                 selectedDate = date;
-                DateFormat format = new SimpleDateFormat("EE");
-                Event e = new Event("", "Event_From_Phone", "This is an event created from the app", "PenguinLand", "PUBLIC", "WEEKLY", format.format(date).substring(0,2).toUpperCase(), date, date, date, 1);
 
-                Log.d("Event_TEST", e.toString());
-                createEvent(e);
+                // get prompts.xml view
+                LayoutInflater li = LayoutInflater.from(MainActivity.this);
+                View promptsView = li.inflate(R.layout.event_details_prompt, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        MainActivity.this);
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+                final EditText summaryEventEdit = (EditText) promptsView
+                        .findViewById(R.id.summaryEventEdit);
+                final EditText descriptionEventEdit = (EditText) promptsView
+                        .findViewById(R.id.descriptionEventEdit);
+                final EditText locationEventEdit = (EditText) promptsView
+                        .findViewById(R.id.locationEventEdit);
+                final EditText dateStartEdit = (EditText) promptsView
+                        .findViewById(R.id.dateStartEdit);
+                final EditText dateEndEdit = (EditText) promptsView
+                        .findViewById(R.id.dateEndEdit);
+
+                final EditText freqPicker = (EditText) promptsView
+                        .findViewById(R.id.intervalPicker);
+                final Spinner freqSpinner = (Spinner) promptsView
+                        .findViewById(R.id.freqSpinner);
+
+                final ToggleButton toggleButton = (ToggleButton) promptsView
+                        .findViewById(R.id.toggleButton);
+
+                dateStartEdit.setText(date.toString());
+
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("Create",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+
+                                        String summary = summaryEventEdit.getText().toString();
+                                        String description = descriptionEventEdit.getText().toString();
+                                        String location = locationEventEdit.getText().toString();
+                                        String dateStart = dateStartEdit.getText().toString();
+                                        String dateEnd = dateEndEdit.getText().toString();
+                                        String interval = "" + freqPicker.getText().toString();
+                                        String freq = freqSpinner.getSelectedItem().toString();
+                                        String visibility = "PUBLIC";
+
+                                        if(toggleButton.isSelected())
+                                            visibility = "PRIVATE";
+
+                                        if(!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))){
+
+                                            DateFormat format = new SimpleDateFormat("EE");
+                                            try {
+
+                                                switch(freq){
+                                                    case "Day" : freq = "DAILY"; break;
+                                                    case "Week" : freq = "WEEKLY"; break;
+                                                    case "Month" : freq = "MONTHLY"; break;
+                                                    case "Year" : freq = "YEARLY"; break;
+                                                    default : freq = "DAILY"; break;
+                                                }
+
+                                                Event e = new Event("", summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0,2).toUpperCase(), dateStart, dateEnd, dateEnd, interval);
+                                                Log.d("Event_TEST", e.toString());
+                                                createEvent(e);
+
+                                            } catch (ParseException e1) {
+                                                e1.printStackTrace();
+                                            }
+
+                                        }
+                                        else
+                                        // TODO: Better feedback
+                                            Toast.makeText(MainActivity.this, "Error during the form check.", Toast.LENGTH_SHORT).show();
+
+
+                                    }
+                                })
+                        .setNegativeButton("Discard",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
 
             }
 

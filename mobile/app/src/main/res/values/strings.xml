@@ -10,4 +10,12 @@
     <string name="username">nesh</string>
     <string name="password">nesh</string>
 
+    <string-array name="freq_list">
+        <item>Pick Time Period</item>
+        <item>Day</item>
+        <item>Week</item>
+        <item>Month</item>
+        <item>Year</item>
+    </string-array>
+
 </resources>
