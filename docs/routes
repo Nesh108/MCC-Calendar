@@ -36,6 +36,14 @@
 /api/events/searches
   POST: Search events given terms
 
+  EXAMPLE:
+    Postman > RAW [JSON(application/json)]
+
+    {
+      "name": {"$regex": "event"}
+      "location": {"$regex": "Hel"}
+    }
+
 ---------------------------------
 
 /api/events/synchronize/all?user=<USERNAME>[&nocache=true]
