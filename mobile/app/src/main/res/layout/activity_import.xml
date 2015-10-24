@@ -6,8 +6,42 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.nesh.mcc_calendar.ImportActivity">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/titleTV"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/hello" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Select Calendar" />
 
+    <ListView
+        android:id="@+id/importListView"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:footerDividersEnabled="false"
+        android:overScrollFooter="@null"
+        android:layout_below="@+id/titleTV" />
+
+    <LinearLayout
+        android:id="@+id/button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            android:text="Back" />
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            android:text="Confirm" />
+    </LinearLayout>
 </RelativeLayout>

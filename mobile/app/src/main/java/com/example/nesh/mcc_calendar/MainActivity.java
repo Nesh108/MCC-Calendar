@@ -85,20 +85,11 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Welcome back " + PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"), Toast.LENGTH_SHORT).show();
 
 
-        // CALENDAR TEST
-        CalendarProvider calendarProvider = new CalendarProvider(this);
-        List<me.everything.providers.android.calendar.Calendar> calendars = calendarProvider.getCalendars().getList();
-
-        for (me.everything.providers.android.calendar.Calendar c : calendars) {
-            Log.d("CALENDAR", c.displayName);
-            for (me.everything.providers.android.calendar.Event e : calendarProvider.getEvents(c.id).getList())
-                Log.d("EVENTS", e.title + " - " + e.description);
-        }
-
-        /////
-
         // Setup Events
         setupEvents();
+
+        if(getIntent().hasExtra("FORCE_SYNCH"))
+            getCalendar();
 
         // If Activity is created after rotation
         if (savedInstanceState != null) {

@@ -17,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,38 +61,38 @@ public class EventAdapter extends ArrayAdapter<Event> {
         DateFormat format = new SimpleDateFormat("HH:mm:ss");
 
         // Populate the data into the template view using the data object
-        eventTv.setText(e.getSummary() + "\t|\t" + e.getLocation() + "\t|\t" + format.format(e.getDateStart()));
+        eventTv.setText(StringUtils.abbreviate(e.getSummary(), 42) + "\t |\t" + format.format(e.getDateStart()));
 
-        deleteEventBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                deleteEventBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                if (parentClassName.equals("MainActivity"))
-                                    ((MainActivity) parentContext).deleteEvent(e.get_id());
-                                else if (parentClassName.equals("ListEventsActivity"))
-                                    ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
+                    public void onClick(View view) {
 
-                                break;
+                        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        if (parentClassName.equals("MainActivity"))
+                                            ((MainActivity) parentContext).deleteEvent(e.get_id());
+                                        else if (parentClassName.equals("ListEventsActivity"))
+                                            ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
 
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                //No button clicked
-                                break;
-                        }
+                                        break;
+
+                                    case DialogInterface.BUTTON_NEGATIVE:
+                                        //No button clicked
+                                        break;
+                                }
+                            }
+                        };
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("No", dialogClickListener).show();
+
+
                     }
-                };
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                        .setNegativeButton("No", dialogClickListener).show();
-
-
-            }
-        });
+                });
 
         showEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,7 +194,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                             Toast.makeText(parentContext, "Interval must be a number.", Toast.LENGTH_SHORT).show();
                                         }
 
-                                        if (!summary.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))) {
+                                        if (!summary.equals("") && !description.equals("") && !dateStart.equals("") && !dateEnd.equals("") && !dateUntil.equals("") && (interval.equals("0") || !freq.equals("Pick Time Period"))) {
 
                                             DateFormat format = new SimpleDateFormat("EE");
                                             try {
@@ -261,6 +263,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 intent.putExtra(CalendarContract.Events.DESCRIPTION, e.getDescription());
                 intent.putExtra(CalendarContract.Events.EVENT_LOCATION, e.getLocation());
 
+                if(e.getVisibility().equals("PRIVATE"))
                 if(e.getVisibility().equals("PRIVATE"))
                     intent.putExtra(CalendarContract.Events.VISIBLE, 0);
 
