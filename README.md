@@ -28,3 +28,7 @@ Check [here](https://github.com/Nesh108/MCC-Calendar/blob/master/docs/routes) fo
 **Current Build Tools Version:** 23.0.1
 
 **Tested on:** Nexus 10
+
+**Screenshot:**
+
+<p align="center"><img src="https://github.com/Nesh108/MCC-Calendar/blob/master/docs/images/Android_app_screenshot.png" width="600"/></p>
