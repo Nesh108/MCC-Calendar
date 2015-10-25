@@ -685,10 +685,70 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Date> getDatesRange(Event e) {
         ArrayList<Date> dates = new ArrayList<>();
 
+        Calendar c_dateStart = Calendar.getInstance();
+        Calendar c_dateEnd = Calendar.getInstance();
+
+        c_dateStart.setTime(e.getDateStart());
+        c_dateEnd.setTime(e.getDateEnd());
+
+        int i = 0;
+        int freq_counter = 0;
+
+        if (new Date(c_dateStart.getTimeInMillis()).compareTo(new Date(c_dateEnd.getTimeInMillis())) <= 0) {
+            // Continue until the date reaches the end of repetition
+            do {
+
+                // Go through each date between date Start and date End
+                while (new Date(c_dateStart.getTimeInMillis()).compareTo(new Date(c_dateEnd.getTimeInMillis())) <= 0) {
+                    dates.add(new Date(c_dateStart.getTimeInMillis()));
+                    Log.d("DATES_ADDED", new Date(c_dateStart.getTimeInMillis()).toString());
+                    Log.d("DATE_EVENT", e.toString());
+
+                    c_dateStart.add(Calendar.DATE, 1);
+                }
+
+                c_dateStart.setTime(e.getDateStart());
+                c_dateEnd.setTime(e.getDateEnd());
+
+                switch (e.getFreq()) {
+                    case "DAILY":
+                        freq_counter = 1;
+                        break;
+                    case "WEEKLY":
+                        freq_counter = 7;
+                        break;
+                    case "MONTHLY":
+                        freq_counter = 31;
+                        break;
+                    case "YEARLY":
+                        freq_counter = 365;
+                        break;
+                    default:
+                        freq_counter = 0;
+                }
+
+                i += e.getInterval();
+                c_dateStart.add(Calendar.DATE, freq_counter * i);
+                c_dateEnd.add(Calendar.DATE, freq_counter * i);
+
+                Log.d("DATES", e.toString());
+
+
+            } while (new Date(c_dateStart.getTimeInMillis()).compareTo(e.getUntil()) <= 0 && freq_counter != 0 && e.getInterval() != 0);
+        }
+        else
+        {
+            Log.d("NOT+TAKEN", e.toString());
+            Log.d("REASON", e.getUntil().toString() + " is before " +  new Date(c_dateStart.getTimeInMillis()).toString());
+
+            dates.add(new Date(c_dateStart.getTimeInMillis()));
+        }
+
+
         // TODO: Do a better job than this
         // Calculate what are the dates in which the event happens
-        dates.add(e.getDateStart());
-        dates.add(e.getUntil());
+        //dates.add(e.getDateStart());
+        //dates.add(e.getUntil());
 
         return dates;
     }
