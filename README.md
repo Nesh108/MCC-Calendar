@@ -23,6 +23,14 @@ Check [here](https://github.com/Nesh108/MCC-Calendar/blob/master/docs/routes) fo
 - Import project (select /mobile as the root)
 - Run after gradle has completed
 
+**Current Features:**
+
+- Synchronize from external calendar
+- Export events to Android calendar
+- Import events from Android calendar
+- Calendar View (show, add, delete and update events)
+- List View (show, delete and update events)
+
 **Current SDK Version:** 23
 
 **Current Build Tools Version:** 23.0.1
