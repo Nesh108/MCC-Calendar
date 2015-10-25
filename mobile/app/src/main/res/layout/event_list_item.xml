@@ -3,15 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
+    android:padding="10dp"
     android:overScrollFooter="#ff000000">
 
     <TextView
         android:id="@+id/eventTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
         android:fontFamily="sans-serif"
-        android:textColor="#FFFFFF"
         android:textSize="25dp" />
 
     <View

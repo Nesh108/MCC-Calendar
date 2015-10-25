@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Base64;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -23,10 +25,8 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import me.everything.providers.android.calendar.Calendar;
 import me.everything.providers.android.calendar.CalendarProvider;
@@ -37,6 +37,8 @@ public class ImportActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import);
+
+        showIcon();
 
         // Calendar providers
         final CalendarProvider calendarProvider = new CalendarProvider(this);
@@ -83,7 +85,7 @@ public class ImportActivity extends AppCompatActivity {
                             Log.d("RRULE_IMPORT", ev_rrule);
                         }
 
-                        if(ev_description.equals(""))
+                        if (ev_description.equals(""))
                             ev_description = "No description.";
 
                         DateFormat format = new SimpleDateFormat("EE");
@@ -109,14 +111,14 @@ public class ImportActivity extends AppCompatActivity {
             backBtn.setVisibility(View.VISIBLE);
             confirmBtn.setVisibility(View.VISIBLE);
 
-            final String[] eventList = new String[calendarProvider.getEvents(intent.getLongExtra("Calendar_ID", 0)).getList().size()];
+            final Spanned[] eventList = new Spanned[calendarProvider.getEvents(intent.getLongExtra("Calendar_ID", 0)).getList().size()];
             int i = 0;
             for (me.everything.providers.android.calendar.Event e : calendarProvider.getEvents(intent.getLongExtra("Calendar_ID", 0)).getList()) {
-                eventList[i] = e.title + " | " + e.description;
+                eventList[i] = Html.fromHtml("<b>" + e.title + "</b><br/><i>" + e.description + "</i>");
                 i++;
             }
 
-            ArrayAdapter<String> eventsArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, eventList);
+            ArrayAdapter<Spanned> eventsArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, eventList);
             importListView.setAdapter(eventsArrayAdapter);
 
             // Pick a calendar and show events
@@ -266,5 +268,11 @@ public class ImportActivity extends AppCompatActivity {
 
             Log.d("EVENT_CREATE", message);
         }
+    }
+
+    private void showIcon() {
+        // Show icon
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
     }
 }

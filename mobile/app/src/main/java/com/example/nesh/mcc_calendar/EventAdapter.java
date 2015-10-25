@@ -1,6 +1,7 @@
 package com.example.nesh.mcc_calendar;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -23,6 +25,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -32,6 +35,8 @@ public class EventAdapter extends ArrayAdapter<Event> {
 
     Context parentContext;
     String parentClassName;
+
+    private static String string_to_update;
 
     public EventAdapter(Context context, ArrayList<Event> events) {
         super(context, 0, events);
@@ -63,36 +68,36 @@ public class EventAdapter extends ArrayAdapter<Event> {
         // Populate the data into the template view using the data object
         eventTv.setText(StringUtils.abbreviate(e.getSummary(), 42) + "\t |\t" + format.format(e.getDateStart()));
 
-                deleteEventBtn.setOnClickListener(new View.OnClickListener() {
+        deleteEventBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(View view) {
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                if (parentClassName.equals("MainActivity"))
+                                    ((MainActivity) parentContext).deleteEvent(e.get_id());
+                                else if (parentClassName.equals("ListEventsActivity"))
+                                    ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
 
-                        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case DialogInterface.BUTTON_POSITIVE:
-                                        if (parentClassName.equals("MainActivity"))
-                                            ((MainActivity) parentContext).deleteEvent(e.get_id());
-                                        else if (parentClassName.equals("ListEventsActivity"))
-                                            ((ListEventsActivity) parentContext).deleteEvent(e.get_id());
+                                break;
 
-                                        break;
-
-                                    case DialogInterface.BUTTON_NEGATIVE:
-                                        //No button clicked
-                                        break;
-                                }
-                            }
-                        };
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                                .setNegativeButton("No", dialogClickListener).show();
-
-
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
                     }
-                });
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+
+            }
+        });
 
         showEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,6 +141,66 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 dateEndEdit.setText(e.getDateEnd().toString());
                 dateUntilEdit.setText(e.getUntil().toString());
                 freqPicker.setText("" + e.getInterval());
+
+                // Date Picker
+
+                final Calendar myCalendarPicker = Calendar.getInstance();
+
+                final DatePickerDialog.OnDateSetListener pickerDate = new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        // TODO Auto-generated method stub
+                        myCalendarPicker.set(Calendar.YEAR, year);
+                        myCalendarPicker.set(Calendar.MONTH, monthOfYear);
+                        myCalendarPicker.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                        if (EventAdapter.string_to_update.equals("dateStart"))
+                            dateStartEdit.setText(myCalendarPicker.getTime().toString());
+                        else if (EventAdapter.string_to_update.equals("dateEnd"))
+                            dateEndEdit.setText(myCalendarPicker.getTime().toString());
+                        else if (EventAdapter.string_to_update.equals("dateUntil"))
+                            dateUntilEdit.setText(myCalendarPicker.getTime().toString());
+
+                        EventAdapter.string_to_update = "";
+                    }
+
+                };
+
+
+                dateStartEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        EventAdapter.string_to_update = "dateStart";
+                        new DatePickerDialog(parentContext, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+                dateEndEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        EventAdapter.string_to_update = "dateEnd";
+                        new DatePickerDialog(parentContext, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+
+                    }
+                });
+                dateUntilEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        EventAdapter.string_to_update = "dateUntil";
+                        new DatePickerDialog(parentContext, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+
+                    }
+                });
 
                 // Select correct value from freq spinner
                 String freq;
@@ -220,7 +285,6 @@ public class EventAdapter extends ArrayAdapter<Event> {
                                                 Event ev = new Event(e.get_id(), summary, description, location, visibility, freq, format.format(new Date(dateStart)).substring(0, 2).toUpperCase(), dateStart, dateEnd, dateUntil, interval);
                                                 Log.d("Event_EDIT", ev.toString());
 
-                                                Toast.makeText(parentContext, "Everything went fine. I am supposed to SEND UPDATE REQUEST.", Toast.LENGTH_SHORT).show();
                                                 if (parentClassName.equals("MainActivity"))
                                                     ((MainActivity) parentContext).updateEvent(ev);
                                                 else if (parentClassName.equals("ListEventsActivity"))
@@ -263,9 +327,9 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 intent.putExtra(CalendarContract.Events.DESCRIPTION, e.getDescription());
                 intent.putExtra(CalendarContract.Events.EVENT_LOCATION, e.getLocation());
 
-                if(e.getVisibility().equals("PRIVATE"))
-                if(e.getVisibility().equals("PRIVATE"))
-                    intent.putExtra(CalendarContract.Events.VISIBLE, 0);
+                if (e.getVisibility().equals("PRIVATE"))
+                    if (e.getVisibility().equals("PRIVATE"))
+                        intent.putExtra(CalendarContract.Events.VISIBLE, 0);
 
                 intent.putExtra(CalendarContract.Events.DTSTART, e.getDateStart());
                 intent.putExtra(CalendarContract.Events.DTEND, e.getDateEnd());

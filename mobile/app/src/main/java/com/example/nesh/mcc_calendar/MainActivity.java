@@ -2,14 +2,15 @@ package com.example.nesh.mcc_calendar;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -44,10 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-
-import me.everything.providers.android.calendar.CalendarProvider;
 
 /**
  * Created by Alberto Vaccari on 23-Oct-15.
@@ -55,7 +54,6 @@ import me.everything.providers.android.calendar.CalendarProvider;
 public class MainActivity extends AppCompatActivity {
 
     final CaldroidFragment caldroidFragment = new CaldroidFragment();
-    private CaldroidFragment dialogCaldroidFragment;
 
     private ArrayList<Event> eventsList = new ArrayList<>();
     ArrayList<Event> eventsOnDate;
@@ -68,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String usr, pass;
 
+    private static String string_to_update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,15 +79,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__").equals("__UNKNOWN__")) {
             showLoginDialog();
-        }
-        else
+        } else
             Toast.makeText(MainActivity.this, "Welcome back " + PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"), Toast.LENGTH_SHORT).show();
 
+
+        showIcon();
 
         // Setup Events
         setupEvents();
 
-        if(getIntent().hasExtra("FORCE_SYNCH"))
+        if (getIntent().hasExtra("FORCE_SYNCH"))
             getCalendar();
 
         // If Activity is created after rotation
@@ -163,7 +163,67 @@ public class MainActivity extends AppCompatActivity {
 
                 dateStartEdit.setText(date.toString());
 
-                // set dialog message
+                // Date Picker
+
+                final Calendar myCalendarPicker = Calendar.getInstance();
+
+                final DatePickerDialog.OnDateSetListener pickerDate = new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        // TODO Auto-generated method stub
+                        myCalendarPicker.set(Calendar.YEAR, year);
+                        myCalendarPicker.set(Calendar.MONTH, monthOfYear);
+                        myCalendarPicker.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                        if (MainActivity.string_to_update.equals("dateStart"))
+                            dateStartEdit.setText(myCalendarPicker.getTime().toString());
+                        else if (MainActivity.string_to_update.equals("dateEnd"))
+                            dateEndEdit.setText(myCalendarPicker.getTime().toString());
+                        else if (MainActivity.string_to_update.equals("dateUntil"))
+                            dateUntilEdit.setText(myCalendarPicker.getTime().toString());
+
+                        MainActivity.string_to_update = "";
+                    }
+
+                };
+
+
+                dateStartEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        MainActivity.string_to_update = "dateStart";
+                        new DatePickerDialog(MainActivity.this, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+                    }
+                });
+                dateEndEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        MainActivity.string_to_update = "dateEnd";
+                        new DatePickerDialog(MainActivity.this, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+
+                    }
+                });
+                dateUntilEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        MainActivity.string_to_update = "dateUntil";
+                        new DatePickerDialog(MainActivity.this, pickerDate, myCalendarPicker
+                                .get(Calendar.YEAR), myCalendarPicker.get(Calendar.MONTH),
+                                myCalendarPicker.get(Calendar.DAY_OF_MONTH)).show();
+
+                    }
+                });
+
+                // Set dialog message
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("Create",
@@ -257,15 +317,6 @@ public class MainActivity extends AppCompatActivity {
 
         eventsListView = (ListView) findViewById(R.id.eventsListView);
 
-        eventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,
-                                    long id) {
-                Toast.makeText(MainActivity.this, "UNKNOWN PLACEHOLDER: " + eventsOnDate.get(position).getDescription(), Toast.LENGTH_LONG).show();
-            }
-        });
-
         eventsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
 
@@ -350,52 +401,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        // TODO: REMOVE THIS
-        // Testing Stuff
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-
-   /*
-        Button showDialogButton = (Button) findViewById(R.id.show_dialog_button);
-
-        final Bundle state = savedInstanceState;
-        showDialogButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Setup caldroid to use as dialog
-                dialogCaldroidFragment = new CaldroidFragment();
-                dialogCaldroidFragment.setCaldroidListener(listener);
-
-                // If activity is recovered from rotation
-                final String dialogTag = "CALDROID_DIALOG_FRAGMENT";
-                if (state != null) {
-                    dialogCaldroidFragment.restoreDialogStatesFromKey(
-                            getSupportFragmentManager(), state,
-                            "DIALOG_CALDROID_SAVED_STATE", dialogTag);
-                    Bundle args = dialogCaldroidFragment.getArguments();
-                    if (args == null) {
-                        args = new Bundle();
-                        dialogCaldroidFragment.setArguments(args);
-                    }
-                } else {
-                    // Setup arguments
-                    Bundle bundle = new Bundle();
-                    // Setup dialogTitle
-                    dialogCaldroidFragment.setArguments(bundle);
-                }
-
-                dialogCaldroidFragment.show(getSupportFragmentManager(),
-                        dialogTag);
-            }
-        });*/
-
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------
-
     }
 
     @Override
@@ -407,10 +412,6 @@ public class MainActivity extends AppCompatActivity {
             caldroidFragment.saveStatesToKey(outState, "CALDROID_SAVED_STATE");
         }
 
-        if (dialogCaldroidFragment != null) {
-            dialogCaldroidFragment.saveStatesToKey(outState,
-                    "DIALOG_CALDROID_SAVED_STATE");
-        }
     }
 
     @Override
@@ -431,6 +432,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
+            finish();
             return true;
         } else if (id == R.id.action_synchronize) {
             getCalendar();
@@ -942,5 +944,11 @@ public class MainActivity extends AppCompatActivity {
 
         // show it
         alertDialog.show();
+    }
+
+    private void showIcon() {
+        // Show icon
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
     }
 }

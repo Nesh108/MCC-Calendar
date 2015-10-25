@@ -14,7 +14,6 @@
         android:id="@+id/eventsListView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:background="#000000"
         android:footerDividersEnabled="false"
         android:overScrollFooter="@null" />
 

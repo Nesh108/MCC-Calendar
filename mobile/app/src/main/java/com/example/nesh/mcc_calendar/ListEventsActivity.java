@@ -19,7 +19,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -35,7 +34,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -58,16 +56,9 @@ public class ListEventsActivity extends AppCompatActivity {
         assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
+        showIcon();
+
         eventsListView = (ListView) findViewById(R.id.eventsListView);
-
-        eventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,
-                                    long id) {
-                Toast.makeText(ListEventsActivity.this, "UNKNOWN PLACEHOLDER: " + eventsList.get(position).getDescription(), Toast.LENGTH_LONG).show();
-            }
-        });
 
         eventsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
@@ -180,7 +171,8 @@ public class ListEventsActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "Settings", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(ListEventsActivity.this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         } else if (id == R.id.action_synchronize) {
             getCalendar();
@@ -190,11 +182,12 @@ public class ListEventsActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
             return true;
-        } else if (id == R.id.action_about){
+        } else if (id == R.id.action_about) {
             showAboutDialog();
             return true;
         } else if (id == R.id.action_import) {
-            Toast.makeText(this, "Import Wizard...", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(ListEventsActivity.this, ImportActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -240,9 +233,6 @@ public class ListEventsActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void processEvents(String events) {
         try {
-                /*JSONObject response = new JSONObject(message);
-                Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();*/
-
 
             InputStream in = new ByteArrayInputStream(events.getBytes(StandardCharsets.UTF_8));
 
@@ -439,7 +429,7 @@ public class ListEventsActivity extends AppCompatActivity {
         }
     }
 
-    private void showAboutDialog(){
+    private void showAboutDialog() {
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(ListEventsActivity.this);
         View promptsView = li.inflate(R.layout.about_prompt, null);
@@ -465,5 +455,11 @@ public class ListEventsActivity extends AppCompatActivity {
 
         // show it
         alertDialog.show();
+    }
+
+    private void showIcon() {
+        // Show icon
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
     }
 }
