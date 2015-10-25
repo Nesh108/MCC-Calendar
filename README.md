@@ -39,6 +39,8 @@ Check [here](https://github.com/Nesh108/MCC-Calendar/blob/master/docs/routes) fo
 
 **Tested on:** Nexus 10
 
+**Pre-compiled APK's:** [Here](https://github.com/Nesh108/MCC-Calendar/blob/master/mobile/pre-compiled/)
+
 **Screenshot:**
 
 <p align="center"><img src="https://github.com/Nesh108/MCC-Calendar/blob/master/docs/images/Android_app_screenshot.png" width="600"/></p>
