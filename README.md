@@ -1,3 +1,5 @@
+# <img src="https://github.com/Nesh108/MCC-Calendar/blob/master/mobile/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="80"/>  MCC-Calendar #
+
 Calendar for the Mobile Cloud Computing course at Aalto University (Espoo, Finland).
 
 **Course**: T-110.5121 - Mobile Cloud Computing
