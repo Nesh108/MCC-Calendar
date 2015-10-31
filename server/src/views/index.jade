@@ -1,0 +1,143 @@
+html
+  head
+    title!= title
+    link(href='css/layout.css', rel='stylesheet')
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+    script(src="js/rrule.js")
+    script(src="js/nlp.js")
+    script(src="js/google_calendar.js")
+    script(src="js/layout.js")
+    script(src="https://apis.google.com/js/client.js?onload=checkAuth")
+  body
+    div#options-div.hover_window
+      div.close_window CLOSE
+      div#authorize-div
+        span Connect Google Calendar
+        button#authorize-button(onclick='handleAuthClick(event)') Add
+      div#importcalendar-div
+        span Import from Google Calendar
+        button#authorizeImport-button(onclick='handleAuthClickForImport(event)') Import
+      div#exportcalendar-div
+        span Export to Google Calendar
+        button#authorizeExport-button(onclick='handleAuthClickForEmport(event)') Export
+
+    div#create_event-div.hover_window
+      div.close_window CLOSE
+      form#createEventForm(name="createEventForm", autocomplete="on")
+        p Add Event
+        p
+          label Name
+          input#createEvent_name(name="createEvent_name", required="required", type="text")
+        p
+          label Description
+          input#createEvent_desc(name="createEvent_desc", required="required", type="text")
+        p
+          label Location
+          input#createEvent_location(name="createEvent_location", type="text")
+        p
+          label Start date
+          input#createEvent_startDate(name="createEvent_startDate", required="required", type="date")
+        p
+          label End date
+          input#createEvent_endDate(name="createEvent_endDate",required="required", type="date")
+        p
+          p REPEAT Event?
+            input.toggle_repeat(name="repeatEvent", type="checkbox")
+        div.hider
+          p
+            label Recurrence Count
+            input#createEvent_recurCount(name="createEvent_recurCount", type="number")
+          p
+            label Recurrence Frequency
+            select#createEvent_recurFreq(name="createEvent_recurFreq")
+              option(value="nonapplicable") non applicable
+              option(value="DAILY") DAILY
+              option(value="WEEKLY") WEEKLY
+              option(value="MONTHLY") MONTHLY
+              option(value="YEARLY") YEARLY
+          p
+            label Recurrence Interval
+            input#createEvent_recurInterval(name="createEvent_recurInterval", type="number")
+          p
+            label Recurrence Until
+            input#createEvent_recurUntil(name="createEvent_recurUntil", type="date")
+        p
+          span PUBLIC
+          input.createEvent_scope(name="createEvent_scope", type="radio", value="PUBLIC", checked)
+          span PRIVATE
+          input.createEvent_scope(name="createEvent_scope", type="radio", value="PRIVATE")
+        p.submitButton
+          input(type="submit" value="Add Event")
+
+    div#modify_event-div.hover_window
+      div.close_window CLOSE
+      form#modifyEventForm(name="modifyEventForm", autocomplete="on")
+        p Modify Event
+        p
+          label Name
+          input#modifyEvent_name(name="modifyEvent_name", required="required", type="text")
+        p
+          label Description
+          input#modifyEvent_desc(name="modifyEvent_desc", required="required", type="text")
+        p
+          label Location
+          input#modifyEvent_location(name="modifyEvent_location", type="text")
+        p
+          label Start date
+          input#modifyEvent_startDate(name="modifyEvent_startDate", required="required", type="date")
+        p
+          label End date
+          input#modifyEvent_endDate(name="modifyEvent_endDate",required="required", type="date")
+        p
+          p REPEAT Event?
+            input.toggle_repeat(name="repeatEvent", type="checkbox")
+        div.hider
+          p
+            label Recurrence Count
+            input#modifyEvent_recurCount(name="modifyEvent_recurCount", type="number")
+          p
+            label Recurrence Frequency
+            select#modifyEvent_recurFreq(name="modifyEvent_recurFreq")
+              option(value="nonapplicable") non applicable
+              option(value="DAILY") DAILY
+              option(value="WEEKLY") WEEKLY
+              option(value="MONTHLY") MONTHLY
+              option(value="YEARLY") YEARLY
+          p
+            label Recurrence Interval
+            input#modifyEvent_recurInterval(name="modifyEvent_recurInterval", type="number")
+          p
+            label Recurrence Until
+            input#modifyEvent_recurUntil(name="modifyEvent_recurUntil", type="date")
+        p
+          span PUBLIC
+          input.modifyEvent_scope(name="modifyEvent_scope", type="radio", value="PUBLIC", checked)
+          span PRIVATE
+          input.modifyEvent_scope(name="modifyEvent_scope", type="radio", value="PRIVATE")
+        p.submitButton
+          input(type="submit" value="Modify Event")
+
+    div#main
+      p#month_title
+      button#back back
+      button#forward forward
+      button#options options
+      button#add_event add event
+
+      table
+        tr.dayNames
+          td
+          td
+          td
+          td
+          td
+          td
+          td
+        - for (var y = 0; y < 6; y++)
+          tr.week
+            - for (var x = 0; x < 7; x++)
+              td
+                p
+                div.day_events
+                  p.day_title
+                  div.events_list

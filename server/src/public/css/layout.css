@@ -1,0 +1,67 @@
+body {
+  background-color: #2a2a2a;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+table {
+  padding-top: 30px;
+  margin: auto;
+  background-color: #ccc;
+}
+
+.week td {
+  width: 110px;
+  height: 110px;
+}
+
+#main {
+  width: 1000px;
+  background-color: #ccc;
+  margin: auto;
+}
+
+.contains {
+  background-color: #6ec2e6;
+}
+
+.day_events {
+  position: absolute;
+  width: 400px;
+  margin: auto;
+  background-color: #ccc;
+  border: 1px solid #afafaf;
+  visibility: hidden;
+  z-index: 2;
+  padding: 10px;
+  box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+  -moz-box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+  -webkit-box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+}
+
+.hover_window {
+  display: none;
+  position: absolute;
+  background-color: #ccc;
+  width: 500px;
+  left: 50%;
+  margin-left: -280px;
+  margin-top: 70px;
+  border: 1px solid #afafaf;
+  z-index: 2;
+  padding: 20px;
+  box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+  -moz-box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+  -webkit-box-shadow: 0px 0px 10px 1px rgba(119, 119, 119, 0.75);
+}
+
+.close_window {
+  text-align: right;
+}
+
+.hider {
+  display: none;
+}
