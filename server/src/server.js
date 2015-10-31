@@ -212,6 +212,14 @@ router.route('/events/searches')
   .post(authController.authorized, function(req, res){
 
     req.body["owner"] = req.user.username;
+    if(req.body["dateStart"]) {
+      req.body["dateStart"]["$gte"] = new Date(req.body["dateStart"]["$gte"]);
+      req.body["dateStart"]["$lt"] = new Date(req.body["dateStart"]["$lt"]);
+    }
+    if(req.body["dateEnd"]) {
+      req.body["dateEnd"]["$gte"] = new Date(req.body["dateEnd"]["$gte"]);
+      req.body["dateEnd"]["$lt"] = new Date(req.body["dateEnd"]["$lt"]);
+    }
 
     Event.find(req.body).exec(function(err, evts){
 
@@ -283,6 +291,13 @@ router.route('/events/synchronize/all')
 /// Web Server
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
+
+app.set('view engine', 'jade');
+app.use(express.static(process.cwd() + '/public'));
+
+app.get('/', function (req, res) {
+  res.render('index', { title: 'Hey', message: 'Hello there!'});
+});
 
 // Inspired by: https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server
 
