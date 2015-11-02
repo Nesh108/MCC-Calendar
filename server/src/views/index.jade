@@ -19,7 +19,9 @@ html
         button#authorizeImport-button(onclick='handleAuthClickForImport(event)') Import
       div#exportcalendar-div
         span Export to Google Calendar
-        button#authorizeExport-button(onclick='handleAuthClickForEmport(event)') Export
+        button#authorizeExport-button(onclick='handleAuthClickForExport(event)') Export
+      p Or add this to Google Calendar:
+        textarea /api/events/synchronize/all?user=<USERNAME>[&nocache=true]
 
     div#create_event-div.hover_window
       div.close_window CLOSE

@@ -11,6 +11,7 @@ table {
   padding-top: 30px;
   margin: auto;
   background-color: #ccc;
+  visibility: hidden;
 }
 
 .week td {
@@ -21,11 +22,30 @@ table {
 #main {
   width: 1000px;
   background-color: #ccc;
+  background-image: url(../img/loader.gif);
+  background-repeat: no-repeat;
+  background-position: center;
   margin: auto;
+}
+
+#modify_event-div {
+  background-image: url(../img/loader.gif);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#modifyEventForm {
+  background-color: #ccc;
+  visibility: hidden;
 }
 
 .contains {
   background-color: #6ec2e6;
+}
+
+.single_event {
+  font-size: 12px;
+  border: 1px solid #afafaf;
 }
 
 .day_events {
@@ -64,4 +84,13 @@ table {
 
 .hider {
   display: none;
+}
+
+.google_event {
+  background-color: #c79d9d;
+}
+
+textarea {
+  width: 90%;
+  margin: auto;
 }

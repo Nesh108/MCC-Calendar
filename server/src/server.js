@@ -296,11 +296,11 @@ app.set('view engine', 'jade');
 app.use(express.static(process.cwd() + '/public'));
 
 app.get('/', function (req, res) {
-  res.render('index', { title: 'Hey', message: 'Hello there!'});
+  res.render('index', { title: 'MCC-Calendar'});
 });
 
 // Inspired by: https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server
-
+/*
 http.createServer(function(request, response) {
 
   var uri = url.parse(request.url).pathname;
@@ -361,7 +361,7 @@ http.createServer(function(request, response) {
     });
   });
 }).listen(parseInt(port_web, 10));
-
+*/
 app.use('/api', router);
 
 // Start server

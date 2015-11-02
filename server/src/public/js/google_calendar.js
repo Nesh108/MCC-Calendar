@@ -55,6 +55,14 @@ var SCOPES = ["https://www.googleapis.com/auth/calendar"];
     }
   }
 
+  function handleAuthResultForExport(authResult) {
+    var authorizeDiv = document.getElementById('authorize-div');
+    if (authResult && !authResult.error) {
+      $("#authorizeExport-button").attr("onclick","exportGoogleCalendar()");
+      loadCalendarApiForExport();
+    }
+  }
+
   /**
   * Initiate auth flow in response to user clicking authorize button.
   *
@@ -79,6 +87,13 @@ var SCOPES = ["https://www.googleapis.com/auth/calendar"];
         return false;
       }
 
+      function handleAuthClickForExport(event) {
+        gapi.auth.authorize(
+          {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
+          handleAuthResultForExport);
+          return false;
+        }
+
     /**
     * Load Google Calendar client library. List upcoming events
     * once client library is loaded.
@@ -93,4 +108,8 @@ var SCOPES = ["https://www.googleapis.com/auth/calendar"];
     */
     function loadCalendarApiForImport() {
       gapi.client.load('calendar', 'v3', importGoogleCalendar);
+    }
+
+    function loadCalendarApiForExport() {
+      gapi.client.load('calendar', 'v3', exportGoogleCalendar);
     }
