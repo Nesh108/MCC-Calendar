@@ -606,6 +606,7 @@ function set_handlers() {
 
 function update_view() {
   $(".day_events").css("visibility", "hidden");
+  $(".event_in_day_view").remove();
   $( "table" ).css("visibility", "hidden");
   prepare_month(current_date.getMonth(), current_date.getFullYear());
   if($("#authorize-button").css("display") == "none") listUpcomingGoogleEvents();
