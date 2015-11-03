@@ -1,5 +1,6 @@
 {
   "name": "node-api",
+  "description": "Calendar project for the Mobile Cloud Computing course",
   "main": "server.js",
   "dependencies": {
     "express": "~4.0.0",
@@ -9,5 +10,10 @@
     "passport": "~0.3.0",
     "passport-http": "~0.3.0",
     "jade": "*"
-  }
+  },
+  "repository" : {
+   "type" : "git",
+   "url" : "https://github.com/Nesh108/MCC-Calendar"
+ },
+ "readme" : "README.md"
 }
