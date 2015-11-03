@@ -367,5 +367,5 @@ app.use('/api', router);
 // Start server
 
 app.listen(port_api);
-console.log('API: Listening on port ' + port_api);
-console.log('Web: Listening on port ' + port_web);
+//console.log('API: Listening on port ' + port_api);
+console.log('Web/API: Listening on port ' + port_api);
