@@ -39,6 +39,26 @@ table {
   visibility: hidden;
 }
 
+.event_in_day_view {
+  position: absolute;
+  width: 90%;
+  right: 0;
+  background-color: rgba(207, 59, 39, 0.2);
+  border: 1px solid #red;
+  text-align: center;
+}
+
+.itistoday {
+  color: rgb(82, 1, 44);
+  border: 1px solid rgb(82, 1, 44);
+}
+
+.hour_delimitator {
+  height: 50px;
+  width: 100%;
+  border-bottom: 1px solid #afafaf;
+}
+
 .contains {
   background-color: #6ec2e6;
 }

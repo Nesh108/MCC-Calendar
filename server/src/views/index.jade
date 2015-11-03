@@ -119,6 +119,12 @@ html
         p.submitButton
           input(type="submit" value="Modify Event")
 
+    div#day_view-div.hover_window
+      div.close_window CLOSE
+      - for (var y = 0; y < 24; y++)
+        div.hour_delimitator #{y}
+
+
     div#main
       p#month_title
       button#back back
@@ -142,4 +148,5 @@ html
                 p
                 div.day_events
                   p.day_title
+                  button.show_day Show day view
                   div.events_list

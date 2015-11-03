@@ -39,17 +39,17 @@ function populate_calendar(event_obj, rule, option) {
   var d_start = event_obj.dateStart;
   var d_end = event_obj.dateEnd;
 
-  if(d_start<d_end && d_start.getMonth() == current_date.getMonth()) {
+  if(d_start<=d_end && d_start.getMonth() == current_date.getMonth()) {
     var event_html;
     if(option == "googleCalendar") event_html = "<div class=\"single_event google_event\">";
     else event_html = "<div class=\"single_event\">";
     event_html += "<button class=\"modify_event\">Modify</button><button class=\"delete_event\">Delete</button>"
     event_html += "<p class=\"event_id\" style=\"display: none\">" + event_obj._id + "</p>";
-    event_html += "<p> Name: " + event_obj.name + "</p>";
+    event_html += "<p class=\"event_name\"> Name: " + event_obj.name + "</p>";
     if(event_obj.description) event_html += "<p> Description: " + event_obj.description + "</p>";
     if(event_obj.location) event_html += "<p> Location: " + event_obj.location + "</p>";
-    event_html += "<p> From: " + d_start + "</p>";
-    if(d_end) event_html += "<p> To: " + d_end + "</p>";
+    event_html += "<p> From: <span class=\"event_dateStart\">" + d_start + "</span></p>";
+    if(d_end) event_html += "<p> To: <span class=\"event_dateEnd\">" + d_end + "</span></p>";
     if(rule) event_html += "<p> When: " + rule.toText() + "</p>";
     event_html += "</div>";
 
@@ -146,14 +146,19 @@ function importGoogleCalendar() {
 
     if (events.length > 0) {
       for (i = 0; i < events.length; i++) {
-        var event = events[i];
-        var requestData = "name="+event.summary+"&";
-        if(event.description) requestData += "description="+event.description+"&";
-        if(event.location) requestData += "location="+event.location+"&";
-        if(event.start.dateTime) requestData += "dateStart="+new Date(event.start.dateTime)+"&";
-        if(event.end.dateTime) requestData += "dateEnd="+new Date(event.end.dateTime)+"&";
-        if(event.status) requestData += "status="+event.status;
-        send_create_event_request(requestData);
+        var eventG = events[i];
+        var requestData = "name="+eventG.summary.replace(/\s/g, '')+"&";
+        if(eventG.description) requestData += "description="+eventG.description.replace(/\s/g, '')+"&";
+        else requestData += "description="+eventG.summary.replace(/\s/g, '')+"&";
+        if(eventG.location) requestData += "location="+eventG.location+"&";
+        if(eventG.start.dateTime) requestData += "dateStart="+new Date(eventG.start.dateTime).toISOString()+"&";
+        if(eventG.end.dateTime) requestData += "dateEnd="+new Date(eventG.end.dateTime).toISOString()+"&";
+
+        requestData = requestData.substring(0, requestData.length - 1);
+        console.log(requestData);
+
+        if(i == events.length-1) send_create_event_request(requestData, "update");
+        else send_create_event_request(requestData, "");
       }
     }
   });
@@ -228,15 +233,15 @@ function retrieve_events(month, year) {
   send_search_request(request);
 }
 
-function send_create_event_request(request) {
+function send_create_event_request(request, option) {
   $.ajax({
     url: '/api/events',
     type: 'post',
     data:request,
     success: function(message) {
       console.log(message);
-      update_view();
-      alert("Event created successfully");
+      if(option == "update") update_view();
+      if(option == "update") alert("Event created successfully");
     }
   });
 }
@@ -476,6 +481,9 @@ function prepare_month(month, year) {
   d = new Date(year,month+1,0);
   var lastDayOfMonth = d.getDate();
 
+  var todayis = null;
+  if(new Date().getMonth() == month) todayis=new Date().getDate();
+
   console.log( "firstDayOfMonth: " + dayByNumber[firstDayOfMonth] );
   console.log( "lastDayOfMonth: " + lastDayOfMonth + " " + dayByNumber[d.getDay()]);
 
@@ -485,10 +493,12 @@ function prepare_month(month, year) {
   // add the numbers to the days
   var day_compare = 0;
   var day_number = 1;
+  $( ".week td" ).removeClass("itistoday");
   $( ".week td" ).each(function( index ) {
     if(day_compare >= firstDayOfMonth && day_number <= lastDayOfMonth) {
       $( this ).children("p").text(day_number);
       $( this ).attr("day_number", day_number);
+      if(todayis && todayis == day_number) $( this  ).addClass("itistoday");
       day_number++;
     } else {
       $( this ).children("p").text("");
@@ -554,6 +564,43 @@ function set_handlers() {
     else $( "#modify_event-div" ).css("display", "none");
   });
 
+  $( ".show_day" ).unbind();
+  $( ".show_day" ).click(function() {
+    $("#day_view-div").find(".event_in_day_view").remove();
+    $(this).parent().find(".single_event").each(function( index, item ) {
+      var dateStart = new Date($(item).find(".event_dateStart").text());
+      var dateEnd = new Date($(item).find(".event_dateEnd").text());
+      var name = $(item).find(".event_name").text();
+      var start = dateStart.getHours();
+      var end = dateEnd.getHours();
+      console.log(start);
+
+      var today_day = $(this).parent().parent().parent().attr("day_number");
+      console.log(today_day);
+
+      console.log(dateStart.getDate() + " " + today_day);
+      console.log(dateStart.getMonth() +" "+ current_date.getMonth());
+      if(dateStart.getDate() < today_day || dateStart.getMonth() < current_date.getMonth()) {
+        start = 0;
+      }
+      if(dateEnd.getDate() > today_day || dateEnd.getMonth() > current_date.getMonth()) {
+        end = 24;
+      }
+      console.log(end);
+      var size = (end-start)*51;
+      if(size<10) size = 10;
+
+      var event_html = '<div class="event_in_day_view"'
+      + ' style="top: '+ ((start*51)+40) +'px; height: '+(size-((size/2)-5))+'px; padding-top: '+((size/2)-5)+'px"'
+      + '><span>'+name+'</span></div>';
+
+      $( "#day_view-div" ).append(event_html);
+    });
+
+    if( $( "#day_view-div" ).css("display") == "none" ) $( "#day_view-div" ).css("display", "block");
+    else $( "#day_view-div" ).css("display", "none");
+  });
+
   $( "table" ).css("visibility", "visible");
 }
 
@@ -590,6 +637,7 @@ $(function() {
   $( ".close_window" ).click(function() {
     $( "#create_event-div" ).css("display", "none");
     $( "#modify_event-div" ).css("display", "none");
+    $( "#day_view-div" ).css("display", "none");
     $( "#options-div" ).css("display", "none");
   });
   $( ".toggle_repeat" ).click(function() {
@@ -621,7 +669,7 @@ $(function() {
 
     console.log(requestData);
 
-    send_create_event_request(requestData);
+    send_create_event_request(requestData, "update");
   });
 
   $("#modifyEventForm").submit(function(e) {
