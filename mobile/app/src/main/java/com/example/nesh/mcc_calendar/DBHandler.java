@@ -8,7 +8,9 @@ import android.util.Log;
 
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Alberto Vaccari on 23-Oct-15.
@@ -76,10 +78,12 @@ public class DBHandler {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Event event = cursorToEvent(cursor);
-            events.add(event);
-
-            Log.d("DB_EVENT", "Fetched: " + event.toString());
+            try {
+                Event event = cursorToEvent(cursor);
+                events.add(event);
+                Log.d("DB_EVENT", "Fetched: " + event.toString());
+            }
+            catch(Exception e){}
             cursor.moveToNext();
         }
         // make sure to close the cursor
@@ -89,7 +93,28 @@ public class DBHandler {
 
     // Converts cursor to an Event
     private Event cursorToEvent(Cursor cursor) throws ParseException {
-        Event event = new Event(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8), cursor.getString(9), cursor.getString(10));
+        Event event;
+
+        try{
+            event = new Event(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8), cursor.getString(9), cursor.getString(10));
+        }
+        catch (IllegalArgumentException ex){
+
+            String dtstart = cursor.getString(7);
+            String dtend = cursor.getString(8);
+            String until = cursor.getString(9);
+
+            SimpleDateFormat sdf =
+                    new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+            Date dateStart = sdf.parse(dtstart);
+            Date dateEnd = sdf.parse(dtend);
+            Date dateUntil = sdf.parse(until);
+
+            event = new Event(cursor.getString(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),dateStart, dateEnd, dateUntil, Integer.parseInt(cursor.getString(10)));
+
+        }
+
         return event;
     }
 

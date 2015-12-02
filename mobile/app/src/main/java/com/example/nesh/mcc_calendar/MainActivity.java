@@ -462,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     private void getCalendar() {
-
+        Toast.makeText(MainActivity.this, "Getting calendar...", Toast.LENGTH_SHORT).show();
         SendSynchronizeRequest job = new SendSynchronizeRequest();
         job.execute(PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY, "__UNKNOWN__"));
     }
@@ -613,7 +613,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Date dateStart = sdf.parse(component.getProperty("DTSTART").getValue().replaceAll("Z$", "+0000"));
                 Date dateEnd = sdf.parse(component.getProperty("DTEND").getValue().replaceAll("Z$", "+0000"));
-                Date until = sdf.parse(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1].replaceAll("Z$", "+0000"));
+
+                Date until;
+                try {
+                    until = sdf.parse(component.getProperty("RRULE").getValue().split(";")[2].split("=")[1].replaceAll("Z$", "+0000"));
+                } catch (Exception e) {
+                    until = new net.fortuna.ical4j.model.Date();
+                }
 
                 Log.d("Date", dateStart.toString());
                 Log.d("Date", dateEnd.toString());
@@ -899,8 +905,10 @@ public class MainActivity extends AppCompatActivity {
 
     protected void testLogin(String username, String password) {
 
-        TestLoginRequest job = new TestLoginRequest();
-        job.execute(username, password);
+        if(!username.equals("") && !password.equals("")) {
+            TestLoginRequest job = new TestLoginRequest();
+            job.execute(username, password);
+        }
     }
 
     private class TestLoginRequest extends AsyncTask<String, Void, String> {
@@ -994,8 +1002,15 @@ public class MainActivity extends AppCompatActivity {
                                 usr = usernameEdit.getText().toString();
                                 pass = passwordEdit.getText().toString();
 
-                                Toast.makeText(MainActivity.this, "Connecting...", Toast.LENGTH_SHORT).show();
-                                testLogin(usr, pass);
+                                if(!usr.equals("") && !pass.equals("")) {
+                                    Toast.makeText(MainActivity.this, "Connecting...", Toast.LENGTH_SHORT).show();
+                                    testLogin(usr, pass);
+                                }
+                                else {
+                                    Toast.makeText(MainActivity.this, "Missing fields!", Toast.LENGTH_SHORT).show();
+                                    System.exit(0);
+                                }
+
                             }
                         });
 

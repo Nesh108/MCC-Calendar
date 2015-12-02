@@ -7,8 +7,8 @@
     <string name="action_import">Import Wizard</string>
     <string name="action_about">About</string>
 
-    <string name="rest_synch_uri">http://mcc-calendar.ddns.net:8080/api/events/synchronize/all</string>
-    <string name="rest_events_uri">http://mcc-calendar.ddns.net:8080/api/events/</string>
+    <string name="rest_synch_uri">http://192.168.1.137:8080/api/events/synchronize/all</string>
+    <string name="rest_events_uri">http://192.168.1.137:8080/api/events/</string>
 
     <string-array name="freq_list">
         <item>Pick Time Period</item>

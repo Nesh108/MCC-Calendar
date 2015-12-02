@@ -252,13 +252,14 @@ public class ListEventsActivity extends AppCompatActivity {
                 String _id = component.getProperty("UID").getValue();
                 String summary = component.getProperty("SUMMARY").getValue();
                 String description = component.getProperty("DESCRIPTION").getValue();
-                String location = component.getProperty("LOCATION").getValue();
+                String location = "";
+                if(component.getProperty("LOCATION").isCalendarProperty())
+                    location = component.getProperty("LOCATION").getValue();
                 String visibility = component.getProperty("CLASS").getValue();
                 String freq = component.getProperty("RRULE").getValue().split(";")[0].split("=")[1];
                 String weekStart = component.getProperty("RRULE").getValue().split(";")[1].split("=")[1];
 
                 int interval = Integer.parseInt(component.getProperty("RRULE").getValue().split(";")[3].split("=")[1]);
-
 
                 SimpleDateFormat sdf =
                         new SimpleDateFormat("yyyyMMdd'T'HHmmss");

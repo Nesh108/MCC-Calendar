@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 
+import android.util.Log;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -45,6 +47,8 @@ public class RestClient {
     public RestClient(String s) {
 
         url = s;
+
+        Log.d("URL", url);
     }
 
 
